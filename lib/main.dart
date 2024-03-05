@@ -23,9 +23,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3E5C79)),
-        fontFamily: GoogleFonts.bizUDGothic().fontFamily,
+        fontFamily: GoogleFonts.mPlus1p().fontFamily,
       ),
-      home: MainPage(),
+      home: const MainPage(),
     );
   }
 }
