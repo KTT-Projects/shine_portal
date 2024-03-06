@@ -15,6 +15,7 @@ class _HomePageState extends State<HomePage> {
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
+      appBar: ,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
