@@ -15,7 +15,9 @@ class _HomePageState extends State<HomePage> {
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
-      appBar: ,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF3E5C79),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -25,8 +27,8 @@ class _HomePageState extends State<HomePage> {
               onPressed: () {
                 FirebaseAuth.instance.signOut();
               },
-              child: Text('Sign out'),
               color: Colors.blue,
+              child: const Text('Sign out'),
             ),
           ],
         ),
