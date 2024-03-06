@@ -11,7 +11,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('Notifications'),
+      child: Center(child: Text('Notifications')),
     );
   }
 }

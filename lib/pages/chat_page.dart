@@ -11,7 +11,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('Chat'),
+      child: Center(child: Text('Chat')),
     );
   }
 }

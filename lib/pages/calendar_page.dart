@@ -11,7 +11,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('Calendar'),
+      child: Center(child: Text('Calendar')),
     );
   }
 }

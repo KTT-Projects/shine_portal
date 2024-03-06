@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:shine_portal/pages/account_page.dart';
+import 'package:shine_portal/pages/calendar_page.dart';
+import 'package:shine_portal/pages/chat_page.dart';
+import 'package:shine_portal/pages/notifications_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -10,27 +14,27 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final user = FirebaseAuth.instance.currentUser!;
+  int _selectedIndex = 0;
+  void navigateBottomBar(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  final List pages = [
+    const CalendarPage(),
+    const ChatPage(),
+    const NotificationsPage(),
+    const AccountPage(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('signed in as: $userId'),
-            MaterialButton(
-              onPressed: () {
-                FirebaseAuth.instance.signOut();
-              },
-              color: Colors.blue,
-              child: const Text('Sign out'),
-            ),
-          ],
-        ),
-      ),
+      body: pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.white, boxShadow: [
           BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(.1))
@@ -62,8 +66,8 @@ class _HomePageState extends State<HomePage> {
                 text: userId,
               ),
             ],
-            selectedIndex: 0,
-            onTabChange: (index) {},
+            selectedIndex: _selectedIndex,
+            onTabChange: (index) => navigateBottomBar(index),
           ),
         ),
       ),

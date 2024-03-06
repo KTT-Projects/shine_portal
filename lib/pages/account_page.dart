@@ -11,7 +11,7 @@ class _AccountPageState extends State<AccountPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('Account'),
+      child: Center(child: Text('Account')),
     );
   }
 }
