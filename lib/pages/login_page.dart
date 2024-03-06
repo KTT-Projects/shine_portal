@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,13 +13,63 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _idController = TextEditingController();
   final _passwordController = TextEditingController();
+  // Prevent concurrent button presses
+  bool _waiting = false; // Added loading state
+
   Future login() async {
+    setState(() {
+      _waiting = true;
+    });
+    showDialog(
+      context: context,
+      builder: (context) {
+        return PopScope(
+          canPop: false,
+          child: Center(
+            child: LoadingAnimationWidget.inkDrop(
+              color: const Color(0xC03E5C79),
+              size: 50,
+            ),
+          ),
+        );
+      },
+    );
     String email = '${_idController.text.trim()}@shine.com';
     String password = _passwordController.text.trim();
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = '';
+      if (e.code == 'too-many-requests') {
+        errorMessage =
+            'このアカウントはロックされました。\n時間を置いてから再度お試しいただくか、\ninfo@kttprojects.comにお問い合わせください。';
+      } else if (e.code == 'invalid-credential' ||
+          e.code == 'invalid-email' ||
+          e.code == 'wrong-password') {
+        errorMessage = 'ユーザーIDまたはパスワードが間違っています';
+      } else {
+        errorMessage =
+            'エラーが発生しました。\n時間を置いてから再度お試しいただくか、\ninfo@kttprojects.comにお問い合わせください。';
+      }
+      // Immediately hide the previous error
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage,
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: const Color(0xFFFF6B6B),
+        ),
+      );
+    }
+    Navigator.of(context).pop();
+    setState(() {
+      _waiting = false;
+    });
   }
 
   @override
@@ -92,7 +143,7 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(),
                       fillColor: Colors.white,
                       filled: true,
-                      hintText: 'ユーザーID',
+                      labelText: 'ユーザーID',
                     ),
                   ),
                 ),
@@ -110,7 +161,7 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(),
                       fillColor: Colors.white,
                       filled: true,
-                      hintText: 'パスワード',
+                      labelText: 'パスワード',
                     ),
                   ),
                 ),
@@ -122,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: login,
+                      onPressed: _waiting ? null : login,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(20),
                         backgroundColor:

@@ -38,6 +38,7 @@ dependencies:
   firebase_auth: ^4.17.6
   google_fonts: ^6.2.0
   firebase_core: ^2.25.5
+  loading_animation_widget: ^1.2.0+4
 
 
 dev_dependencies:
