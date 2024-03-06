@@ -69,8 +69,24 @@ class _HomePageState extends State<HomePage> {
             selectedIndex: _selectedIndex,
             onTabChange: (index) => navigateBottomBar(index),
           ),
-        ),
-      ),
+        )
+      )
+      // appBar: ,
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Text('signed in as: $userId'),
+//             MaterialButton(
+//               onPressed: () {
+//                 FirebaseAuth.instance.signOut();
+//               },
+//               child: Text('Sign out'),
+//               color: Colors.blue,
+//             ),
+//           ],
+//         ),
+//       ),
     );
   }
 }
