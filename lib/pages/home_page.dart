@@ -34,6 +34,8 @@ class _HomePageState extends State<HomePage> {
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
+      appBar: AppBar(),
+      backgroundColor: Color(0xFFF0F5FA),
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -48,6 +50,8 @@ class _HomePageState extends State<HomePage> {
             tabBackgroundColor: const Color(0x2F3E5C79),
             duration: const Duration(milliseconds: 300),
             gap: 10,
+            mainAxisAlignment: MainAxisAlignment.center,
+            padding: EdgeInsets.all(20),
             tabs: [
               const GButton(
                 icon: Icons.home,
@@ -69,24 +73,8 @@ class _HomePageState extends State<HomePage> {
             selectedIndex: _selectedIndex,
             onTabChange: (index) => navigateBottomBar(index),
           ),
-        )
-      )
-      // appBar: ,
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Text('signed in as: $userId'),
-//             MaterialButton(
-//               onPressed: () {
-//                 FirebaseAuth.instance.signOut();
-//               },
-//               child: Text('Sign out'),
-//               color: Colors.blue,
-//             ),
-//           ],
-//         ),
-//       ),
+        ),
+      ),
     );
   }
 }

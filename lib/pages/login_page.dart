@@ -79,121 +79,124 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         backgroundColor: const Color(0xffF0F5FA),
         body: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 30),
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return const LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0xFF3E5C79),
-                          Color(0xC03E5C79),
-                        ],
-                      ).createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcIn,
-                    child: Image.asset(
-                      'lib/images/logo.png',
-                      width: 250,
-                    ),
-                  ),
-                ),
-                ShaderMask(
-                  shaderCallback: (bounds) => const LinearGradient(
-                    colors: [
-                      Color(0xC03E5C79),
-                      Color(0xFF3E5C79),
-                      Color(0xC03E5C79),
-                    ],
-                    tileMode: TileMode.mirror,
-                  ).createShader(bounds),
-                  child: Text(
-                    'シャインポータルへようこそ',
-                    style: GoogleFonts.dotGothic16(
-                      textStyle: const TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 20,
-                        color: Colors.white,
+          child: Container(
+            width: 430,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: ShaderMask(
+                      shaderCallback: (Rect bounds) {
+                        return const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Color(0xFF3E5C79),
+                            Color(0xC03E5C79),
+                          ],
+                        ).createShader(bounds);
+                      },
+                      blendMode: BlendMode.srcIn,
+                      child: Image.asset(
+                        'lib/images/logo.png',
+                        width: 250,
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const Text(
-                  'IDとパスワードを以下の欄に入力してください',
-                  style: TextStyle(
-                    color: Color(0x951C1D21),
-                  ),
-                ),
-                const SizedBox(
-                  height: 50,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50),
-                  child: TextField(
-                    controller: _idController,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      fillColor: Colors.white,
-                      filled: true,
-                      labelText: 'ユーザーID',
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 50),
-                  child: TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    enableSuggestions: false,
-                    autocorrect: false,
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      fillColor: Colors.white,
-                      filled: true,
-                      labelText: 'パスワード',
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 30,
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 100),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _waiting ? null : login,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.all(20),
-                        backgroundColor:
-                            const Color(0xFF3E5C79), // Background color
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(5), // Closer to a rectangle
+                  ShaderMask(
+                    shaderCallback: (bounds) => const LinearGradient(
+                      colors: [
+                        Color(0xC03E5C79),
+                        Color(0xFF3E5C79),
+                        Color(0xC03E5C79),
+                      ],
+                      tileMode: TileMode.mirror,
+                    ).createShader(bounds),
+                    child: Text(
+                      'シャインポータルへようこそ',
+                      style: GoogleFonts.dotGothic16(
+                        textStyle: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 20,
+                          color: Colors.white,
                         ),
                       ),
-                      child: const Text(
-                        'ログイン',
-                        style: TextStyle(
-                            color: Color(0xFFF0F5FA),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  const Text(
+                    'IDとパスワードを以下の欄に入力してください',
+                    style: TextStyle(
+                      color: Color(0x951C1D21),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 50,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 50),
+                    child: TextField(
+                      controller: _idController,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true,
+                        labelText: 'ユーザーID',
                       ),
                     ),
                   ),
-                )
-              ],
+                  const SizedBox(
+                    height: 15,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 50),
+                    child: TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.white,
+                        filled: true,
+                        labelText: 'パスワード',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 100),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _waiting ? null : login,
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.all(20),
+                          backgroundColor:
+                              const Color(0xFF3E5C79), // Background color
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                5), // Closer to a rectangle
+                          ),
+                        ),
+                        child: const Text(
+                          'ログイン',
+                          style: TextStyle(
+                              color: Color(0xFFF0F5FA),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
