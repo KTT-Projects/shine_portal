@@ -51,7 +51,7 @@ class _HomePageState extends State<HomePage> {
             duration: const Duration(milliseconds: 300),
             gap: 10,
             mainAxisAlignment: MainAxisAlignment.center,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             tabs: [
               const GButton(
                 icon: Icons.home,
