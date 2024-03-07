@@ -22,6 +22,11 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
   final List pages = [
     const CalendarPage(),
     const ChatPage(),
@@ -31,11 +36,14 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = user.email!.replaceAll('@shine.com', '');
+    String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
 
     return Scaffold(
-      appBar: AppBar(),
-      backgroundColor: Color(0xFFF0F5FA),
+      appBar: AppBar(
+        toolbarHeight: 0,
+        backgroundColor: Color(0xFFF0F5FA),
+      ),
+      backgroundColor: const Color(0xFFF0F5FA),
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -51,7 +59,7 @@ class _HomePageState extends State<HomePage> {
             duration: const Duration(milliseconds: 300),
             gap: 10,
             mainAxisAlignment: MainAxisAlignment.center,
-            padding: EdgeInsets.all(20),
+            padding: const EdgeInsets.all(20),
             tabs: [
               const GButton(
                 icon: Icons.home,
