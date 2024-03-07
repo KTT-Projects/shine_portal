@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
+      backgroundColor: Color(0xFFF0F5FA),
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Colors.white, boxShadow: [
@@ -48,6 +49,8 @@ class _HomePageState extends State<HomePage> {
             tabBackgroundColor: const Color(0x2F3E5C79),
             duration: const Duration(milliseconds: 300),
             gap: 10,
+            mainAxisAlignment: MainAxisAlignment.center,
+            padding: EdgeInsets.all(20),
             tabs: [
               const GButton(
                 icon: Icons.home,
