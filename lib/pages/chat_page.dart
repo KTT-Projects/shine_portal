@@ -14,7 +14,7 @@ class _ChatPageState extends State<ChatPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text(
-            'チャットくんを選択してください',
+            'チャットタイプを選択してください',
             style: TextStyle(
               fontSize: 16,
             ),
