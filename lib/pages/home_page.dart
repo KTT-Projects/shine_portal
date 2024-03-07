@@ -7,7 +7,7 @@ import 'package:shine_portal/pages/chat_page.dart';
 import 'package:shine_portal/pages/notifications_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -16,18 +16,22 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final user = FirebaseAuth.instance.currentUser!;
   int _selectedIndex = 0;
+
+  // Function to navigate the bottom bar
   void navigateBottomBar(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
 
+  // Capitalize the first letter of a string
   String capitalize(String s) {
     if (s.isEmpty) return s;
     return s[0].toUpperCase() + s.substring(1);
   }
 
-  final List pages = [
+  // List of pages to display in the bottom bar
+  final List<Widget> pages = [
     const CalendarPage(),
     const ChatPage(),
     const NotificationsPage(),
@@ -36,22 +40,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Capitalize the user's email and remove the domain to display as the user's name
     String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
 
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0,
-        backgroundColor: Color(0xFFF0F5FA),
+        backgroundColor: const Color(0xFFF0F5FA),
       ),
       backgroundColor: const Color(0xFFF0F5FA),
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white, boxShadow: [
-          BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(.1))
-        ]),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(.1)),
+          ],
+        ),
         child: Padding(
-          padding:
-              const EdgeInsets.only(bottom: 20, top: 10, left: 20, right: 20),
+          padding: const EdgeInsets.only(
+            bottom: 20,
+            top: 10,
+            left: 20,
+            right: 20,
+          ),
           child: GNav(
             haptic: true,
             tabBorderRadius: 35,
@@ -63,19 +75,19 @@ class _HomePageState extends State<HomePage> {
             tabs: [
               const GButton(
                 icon: Icons.home,
-                text: 'ホーム',
+                text: 'ホーム', // Home tab
               ),
               const GButton(
                 icon: Icons.chat,
-                text: 'チャット',
+                text: 'チャット', // Chat tab
               ),
               const GButton(
                 icon: Icons.notifications,
-                text: '通知',
+                text: '通知', // Notifications tab
               ),
               GButton(
                 icon: Icons.person,
-                text: userId,
+                text: userId, // User's name tab
               ),
             ],
             selectedIndex: _selectedIndex,

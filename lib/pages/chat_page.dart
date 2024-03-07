@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// A page for creating chat rooms.
+// A page for creating chat rooms.
 class ChatPage extends StatefulWidget {
   const ChatPage({Key? key}) : super(key: key);
 
@@ -9,7 +9,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
-  /// Creates a dialog for selecting the chat type.
+  // Creates a dialog for selecting the chat type.
   void createChatRoom() {
     showDialog(
       context: context,
@@ -73,6 +73,9 @@ class _ChatPageState extends State<ChatPage> {
               onPressed: createChatRoom,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF3E5C79),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(0),
+                ),
               ),
               child: const SizedBox(
                 width: double.infinity,
