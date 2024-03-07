@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
+/// A page for creating chat rooms.
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  const ChatPage({Key? key}) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
+  /// Creates a dialog for selecting the chat type.
   void createChatRoom() {
     showDialog(
       context: context,
@@ -23,6 +25,10 @@ class _ChatPageState extends State<ChatPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
+                // Add border radius to the list tile.
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
                 leading: const Icon(Icons.person),
                 title: const Text(
                   '個人',
@@ -31,10 +37,14 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 onTap: () {
-                  // Handle the tap
+                  // Handle the tap.
                 },
               ),
               ListTile(
+                // Add border radius to the list tile.
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                ),
                 leading: const Icon(Icons.group),
                 title: const Text(
                   'グループ',
@@ -43,7 +53,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 onTap: () {
-                  // Handle the tap
+                  // Handle the tap.
                 },
               ),
             ],
@@ -62,7 +72,6 @@ class _ChatPageState extends State<ChatPage> {
             ElevatedButton(
               onPressed: createChatRoom,
               style: ElevatedButton.styleFrom(
-                shape: const RoundedRectangleBorder(),
                 backgroundColor: const Color(0xFF3E5C79),
               ),
               child: const SizedBox(
