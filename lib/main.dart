@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3E5C79)),
-        fontFamily: GoogleFonts.mPlus1p().fontFamily,
+        // fontFamily: GoogleFonts.mPlus1p().fontFamily,
+        textTheme: GoogleFonts.mPlus1pTextTheme(),
       ),
       home: const MainPage(),
     );
