@@ -34,6 +34,7 @@ class _HomePageState extends State<HomePage> {
     String userId = user.email!.replaceAll('@shine.com', '');
 
     return Scaffold(
+      appBar: AppBar(),
       backgroundColor: Color(0xFFF0F5FA),
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(

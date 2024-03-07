@@ -19,17 +19,17 @@ class _AccountPageState extends State<AccountPage> {
       child: Center(
         child: ElevatedButton(
           onPressed: logout,
-          child: Text(
-            'ログアウト',
-            style: TextStyle(
-              color: Color(0xFFF0F5FA),
-            ),
-          ),
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(15),
             backgroundColor: const Color(0xFF3E5C79), // Background color
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(5), // Closer to a rectangle
+            ),
+          ),
+          child: const Text(
+            'ログアウト',
+            style: TextStyle(
+              color: Color(0xFFF0F5FA),
             ),
           ),
         ),
