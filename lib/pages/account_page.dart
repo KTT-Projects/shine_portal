@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -24,7 +22,6 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
 
     return Center(
       child: Column(
@@ -47,7 +44,7 @@ class _AccountPageState extends State<AccountPage> {
               width: 250,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               colors: [
@@ -68,14 +65,14 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          const Text(
             'サポート: info@kttprojects.com',
             style: TextStyle(
               color: Color(0x951C1D21),
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           ElevatedButton(
             onPressed: logout,
             style: ElevatedButton.styleFrom(

@@ -21,7 +21,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
+            children: [
               ListTile(
                 leading: const Icon(Icons.person),
                 title: const Text(
