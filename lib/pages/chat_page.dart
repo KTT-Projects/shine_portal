@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'chat_room.dart';
+
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -31,6 +33,13 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const IndivisualChatRoom();
+                      }
+                    ),
+                  );
                   // Handle the tap
                 },
               ),
@@ -64,8 +73,7 @@ class _ChatPageState extends State<ChatPage> {
               style: ElevatedButton.styleFrom(
                 shape: const RoundedRectangleBorder(),
                 backgroundColor: const Color(0xFF3E5C79),
-              ),
-              child: const SizedBox(
+              ),child: const SizedBox(
                 width: double.infinity,
                 child: Center(
                   child: Text(
@@ -76,8 +84,8 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-            ),
-          ],
+            )
+          ]
         ),
       ),
     );
