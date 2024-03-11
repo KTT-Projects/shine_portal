@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'chat_room.dart';
 import 'package:shine_portal/pages/components/create_chat.dart';
 
 // A page for creating chat rooms.
@@ -45,8 +46,8 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
               ),
-            ),
-          ],
+            )
+          ]
         ),
       ),
     );
