@@ -26,8 +26,7 @@ class IndivisualChatRoomState extends State<IndivisualChatRoom> {
       id: 'otheruser',
       firstName: "テスト",
       lastName: "太郎",
-      imageUrl:
-          "https://pbs.twimg.com/profile_images/1335856760972689408/Zeyo7jdq_bigger.jpg");
+  );
 
   @override
     void initState() {
@@ -42,6 +41,16 @@ class IndivisualChatRoomState extends State<IndivisualChatRoom> {
   @override
   Widget build(BuildContext context) => Scaffold(
         body: Chat(
+          // 追加
+          theme: const DefaultChatTheme(
+            backgroundColor: Color(0xFFF0F5FA),
+            primaryColor: Color(0xFF3E5C79),  // メッセージの背景色の変更
+            userAvatarNameColors: [Colors.black87],  // ユーザー名の文字色の変更
+            sentMessageDocumentIconColor: Colors.black87,
+            secondaryColor: Color(0xFFFFFFFF),
+            inputBackgroundColor: Color(0xFFFFFFFF),
+            inputTextColor: Color(0xFF1C1D21)
+          ),
           messages: _messages,
           onSendPressed: _handleSendPressed,
           user: _user,
