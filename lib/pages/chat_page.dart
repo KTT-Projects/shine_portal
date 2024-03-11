@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:searchfield/searchfield.dart';
 import 'package:shine_portal/pages/components/create_chat.dart';
 
 // A page for creating chat rooms.

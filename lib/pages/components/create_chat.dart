@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shine_portal/pages/components/create_dm.dart';
 
 class CreateChat extends StatefulWidget {
   const CreateChat({super.key});
@@ -34,6 +35,12 @@ class _CreateChatState extends State<CreateChat> {
             ),
             onTap: () {
               // Handle the tap.
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CreateDm();
+                },
+              );
             },
           ),
           ListTile(
