@@ -35,11 +35,11 @@ class _CreateChatState extends State<CreateChat> {
             ),
             onTap: () {
               // Handle the tap.
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return CreateDm();
-                },
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateDm(),
+                ),
               );
             },
           ),

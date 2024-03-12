@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:searchfield/searchfield.dart';
 
 class CreateDm extends StatefulWidget {
@@ -16,25 +15,110 @@ class _CreateDmState extends State<CreateDm> {
   final TextEditingController _searchFieldController = TextEditingController();
   String _searchFieldValue = '';
   final db = FirebaseFirestore.instance;
+  String userId =
+      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
   Future create_dm() async {
-    String userId =
-        FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+    bool flag = false;
     _searchFieldValue = _searchFieldController.text;
-    final docRef = db.collection('userData').doc(_searchFieldValue);
-    docRef.get().then(
-      (DocumentSnapshot doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        print(data);
-        if (data == null) {
-          print('No such document!');
-        } else {
-          print('Document data: ${doc.data()}');
+    if (_searchFieldValue == '') {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'ユーザー名を入力してください',
+            textAlign: TextAlign.center,
+          ),
+          backgroundColor: const Color(0xFFFF6B6B),
+        ),
+      );
+      return;
+    }
+    CollectionReference userData = db.collection('userData');
+    final docRef = userData.doc(userId);
+    final docSnapshot = await docRef.get();
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      data['room_id'].forEach((value) {
+        if (value == _searchFieldValue.toLowerCase()) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'このユーザーとのDMはすでに存在します',
+                textAlign: TextAlign.center,
+              ),
+              backgroundColor: const Color(0xFFFF6B6B),
+            ),
+          );
+          flag = true;
         }
-      },
-      onError: (e) => print("Error getting document: $e"),
-    );
-    // Navigator.pop(context);
+      });
+      if (flag) {
+        return;
+      }
+      suggestions.forEach((value) {
+        if (value.toLowerCase() == _searchFieldValue.toLowerCase()) {
+          flag = true;
+        }
+      });
+      if (!flag) {
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'ユーザーが見つかりませんでした',
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: const Color(0xFFFF6B6B),
+          ),
+        );
+        return;
+      }
+      data['room_id'].add(_searchFieldValue.toLowerCase());
+      docRef.update(data);
+    } else {
+      AlertDialog(
+        title: const Text('エラー'),
+        content: const Text('ユーザーが見つかりませんでした'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      );
+    }
+  }
+
+  // Capitalize the first letter of a string
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+  List<String> suggestions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSuggestions();
+  }
+
+  Future<void> fetchSuggestions() async {
+    QuerySnapshot querySnapshot = await db.collection('userData').get();
+    List<String> documentNames = [];
+    querySnapshot.docs.forEach((doc) {
+      String documentName = doc.id;
+      if (documentName != userId) {
+        documentNames.add(capitalize(documentName));
+      }
+    });
+    setState(() {
+      suggestions = documentNames;
+    });
   }
 
   @override
@@ -46,6 +130,10 @@ class _CreateDmState extends State<CreateDm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 0,
+        backgroundColor: const Color(0xFFF0F5FA),
+      ),
       backgroundColor: const Color(0xFFF0F5FA),
       body: Column(
         children: [
@@ -77,10 +165,16 @@ class _CreateDmState extends State<CreateDm> {
             child: SearchField(
               controller: _searchFieldController,
               hint: 'Basic SearchField',
-              suggestions: ['ABC', 'DEF', 'GHI', 'JKL']
-                  .map(SearchFieldListItem<String>.new)
-                  .toList(),
+              suggestions:
+                  suggestions.map(SearchFieldListItem<String>.new).toList(),
               suggestionState: Suggestion.expand,
+              maxSuggestionsInViewPort: 10,
+              suggestionsDecoration: SuggestionDecoration(
+                borderRadius: BorderRadius.circular(5),
+              ),
+              scrollbarDecoration: ScrollbarDecoration(
+                thickness: 0,
+              ),
             ),
           ),
           const SizedBox(
