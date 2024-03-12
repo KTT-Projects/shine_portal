@@ -5,6 +5,7 @@ import 'package:shine_portal/pages/account_page.dart';
 import 'package:shine_portal/pages/calendar_page.dart';
 import 'package:shine_portal/pages/chat_page.dart';
 import 'package:shine_portal/pages/notifications_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -38,11 +39,50 @@ class _HomePageState extends State<HomePage> {
     const AccountPage(),
   ];
 
+  final TextEditingController _searchFieldController = TextEditingController();
+  String _searchFieldValue = '';
+  final db = FirebaseFirestore.instance;
+  String userId =
+      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+
+  Future addUser() async {
+    _searchFieldValue = _searchFieldController.text;
+    CollectionReference userData = db.collection('userData');
+    final docRef = userData.doc(userId);
+    final docSnapshot = await docRef.get();
+    if (!docSnapshot.exists) {
+      // add userdata if it does not exist
+      userData.doc(userId).set({
+        'dm': [],
+        'group': [],
+      });
+    }
+  }
+
+  List<String> suggestions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    addUser();
+  }
+
+  Future<void> fetchSuggestions() async {
+    QuerySnapshot querySnapshot = await db.collection('userData').get();
+    List<String> documentNames = [];
+    querySnapshot.docs.forEach((doc) {
+      String documentName = doc.id;
+      if (documentName != userId) {
+        documentNames.add(documentName);
+      }
+    });
+    setState(() {
+      suggestions = documentNames;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Capitalize the user's email and remove the domain to display as the user's name
-    String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
-
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0,
@@ -87,7 +127,7 @@ class _HomePageState extends State<HomePage> {
               ),
               GButton(
                 icon: Icons.person,
-                text: userId, // User's name tab
+                text: capitalize(userId), // User's name tab
               ),
             ],
             selectedIndex: _selectedIndex,
