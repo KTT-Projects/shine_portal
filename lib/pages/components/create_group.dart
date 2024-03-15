@@ -21,9 +21,7 @@ class _CreateGroupState extends State<CreateGroup> {
   final db = FirebaseFirestore.instance;
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
-
   bool isLoading = false; // Added loading state
-
   List users = [];
 
   Future add_user() async {
@@ -133,6 +131,7 @@ class _CreateGroupState extends State<CreateGroup> {
       });
       return;
     }
+
     CollectionReference userData = db.collection('userData');
     final docRef = userData.doc(userId);
     final docSnapshot = await docRef.get();
