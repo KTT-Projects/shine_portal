@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:searchfield/searchfield.dart';
+import 'package:shine_portal/pages/chat_room.dart';
 
 class CreateDm extends StatefulWidget {
   const CreateDm({Key? key}) : super(key: key);
@@ -18,20 +19,29 @@ class _CreateDmState extends State<CreateDm> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
+  bool isLoading = false; // Added loading state
+
   Future create_dm() async {
+    setState(() {
+      isLoading = true; // Show loading indicator
+    });
+
     bool flag = false;
     _searchFieldValue = _searchFieldController.text;
     if (_searchFieldValue == '') {
       ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
             'ユーザー名を入力してください',
             textAlign: TextAlign.center,
           ),
-          backgroundColor: const Color(0xFFFF6B6B),
+          backgroundColor: Color(0xFFFF6B6B),
         ),
       );
+      setState(() {
+        isLoading = false; // Hide loading indicator
+      });
       return;
     }
     CollectionReference userData = db.collection('userData');
@@ -40,45 +50,56 @@ class _CreateDmState extends State<CreateDm> {
     if (docSnapshot.exists) {
       final data = docSnapshot.data() as Map<String, dynamic>;
       data['dm']?.forEach((value) {
-        if (value == _searchFieldValue.toLowerCase()) {
+        if (value[0] == _searchFieldValue.toLowerCase()) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
+            const SnackBar(
               content: Text(
                 'このユーザーとのDMはすでに存在します',
                 textAlign: TextAlign.center,
               ),
-              backgroundColor: const Color(0xFFFF6B6B),
+              backgroundColor: Color(0xFFFF6B6B),
             ),
           );
           flag = true;
         }
       });
       if (flag) {
+        setState(() {
+          isLoading = false; // Hide loading indicator
+        });
         return;
       }
-      suggestions.forEach((value) {
+      for (var value in suggestions) {
         if (value.toLowerCase() == _searchFieldValue.toLowerCase()) {
           flag = true;
         }
-      });
+      }
       if (!flag) {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text(
               'ユーザーが見つかりませんでした',
               textAlign: TextAlign.center,
             ),
-            backgroundColor: const Color(0xFFFF6B6B),
+            backgroundColor: Color(0xFFFF6B6B),
           ),
         );
+        setState(() {
+          isLoading = false; // Hide loading indicator
+        });
         return;
       }
-      if (data['dm'] == null) {
-        data['dm'] = [];
-      }
+      CollectionReference dm = db.collection('dm');
+      final newDocRef = await dm.add({
+        'messages': ['DMが作成されました'],
+        'time': [DateTime.now()],
+        'sender': [userId],
+      });
+      final newDocId = newDocRef.id;
       data['dm'].add(_searchFieldValue.toLowerCase());
+      data['dmId'].add(newDocId);
       docRef.update(data);
       final docRef2 = userData.doc(_searchFieldValue.toLowerCase());
       final docSnapshot2 = await docRef2.get();
@@ -86,11 +107,25 @@ class _CreateDmState extends State<CreateDm> {
         final data2 = docSnapshot2.data() as Map<String, dynamic>;
         if (data2['dm'] == null) {
           data2['dm'] = [];
+          data2['dmId'] = [];
         }
         data2['dm'].add(userId);
+        data2['dmId'].add(newDocId);
         docRef2.update(data2);
       }
     }
+    setState(() {
+      isLoading = false; // Hide loading indicator
+    });
+    Navigator.popUntil(context, (route) => route.isFirst);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => IndivisualChatRoom(
+          name: capitalize(_searchFieldValue.toLowerCase()),
+        ),
+      ),
+    );
   }
 
   // Capitalize the first letter of a string
@@ -110,12 +145,12 @@ class _CreateDmState extends State<CreateDm> {
   Future<void> fetchSuggestions() async {
     QuerySnapshot querySnapshot = await db.collection('userData').get();
     List<String> documentNames = [];
-    querySnapshot.docs.forEach((doc) {
+    for (var doc in querySnapshot.docs) {
       String documentName = doc.id;
       if (documentName != userId) {
         documentNames.add(capitalize(documentName));
       }
-    });
+    }
     setState(() {
       suggestions = documentNames;
     });
@@ -169,15 +204,22 @@ class _CreateDmState extends State<CreateDm> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 child: SearchField(
                   controller: _searchFieldController,
-                  hint: 'Basic SearchField',
-                  suggestions:
-                      suggestions.map(SearchFieldListItem<String>.new).toList(),
+                  hint: 'ユーザー名を入力してください',
+                  suggestions: isLoading
+                      ? [] // Hide suggestions while loading
+                      : suggestions
+                          .map(SearchFieldListItem<String>.new)
+                          .toList(),
                   suggestionState: Suggestion.expand,
                   maxSuggestionsInViewPort: 10,
                   suggestionsDecoration: SuggestionDecoration(
                     borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color: const Color(0xFF3E5C79),
+                      width: 2,
+                    ),
                   ),
-                  suggestionStyle: TextStyle(
+                  suggestionStyle: const TextStyle(
                     color: Colors.black,
                     fontSize: 15,
                   ),
@@ -195,7 +237,9 @@ class _CreateDmState extends State<CreateDm> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ElevatedButton(
-                  onPressed: create_dm,
+                  onPressed: isLoading
+                      ? null
+                      : create_dm, // Disable button when loading
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
@@ -204,10 +248,12 @@ class _CreateDmState extends State<CreateDm> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 30, vertical: 20),
                   ),
-                  child: const Text(
-                    'DMを作成',
-                    style: TextStyle(color: Colors.white),
-                  ),
+                  child: isLoading
+                      ? const CircularProgressIndicator() // Show loading indicator
+                      : const Text(
+                          'DMを作成',
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ),
