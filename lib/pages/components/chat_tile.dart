@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
+import 'package:shine_portal/pages/chat_room.dart';
 
 class ChatTile extends StatefulWidget {
   final String name;
@@ -57,61 +58,87 @@ class _ChatTileState extends State<ChatTile> {
             borderRadius: BorderRadius.circular(12),
           )
         ]),
-        child: Card(
-          color: const Color(0xFFF0F5FA),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(15),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 30,
-                      // child: Icon(Icons.person),
-                      child: Icon(
-                        widget.type == 'dm' ? Icons.person : Icons.group,
-                        size: 30,
+        child: GestureDetector(
+          onTap: () {
+            // Navigate to the chat page
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => IndivisualChatRoom(name: widget.name),
+              ),
+            );
+          },
+          child: Card(
+            color: const Color(0xFFF0F5FA),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Container(
+              padding: const EdgeInsets.all(15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 30,
+                        // child: Icon(Icons.person),
+                        child: Icon(
+                          widget.type == 'dm' ? Icons.person : Icons.group,
+                          size: 30,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text(
-                          widget.latest_message,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
+                          Text(
+                            widget.latest_message,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                Text(
-                  formattedTime,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
+                        ],
+                      ),
+                    ],
                   ),
-                  textAlign: TextAlign.right,
-                ),
-              ],
+                  Text(
+                    formattedTime,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class ChatPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // TODO: Implement the chat page UI
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Chat Page'),
+      ),
+      body: Center(
+        child: Text('Chat Page'),
       ),
     );
   }
