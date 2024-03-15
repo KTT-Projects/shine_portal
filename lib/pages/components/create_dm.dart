@@ -39,7 +39,7 @@ class _CreateDmState extends State<CreateDm> {
     final docSnapshot = await docRef.get();
     if (docSnapshot.exists) {
       final data = docSnapshot.data() as Map<String, dynamic>;
-      data['room_id'].forEach((value) {
+      data['dm']?.forEach((value) {
         if (value == _searchFieldValue.toLowerCase()) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
@@ -75,21 +75,21 @@ class _CreateDmState extends State<CreateDm> {
         );
         return;
       }
-      data['room_id'].add(_searchFieldValue.toLowerCase());
+      if (data['dm'] == null) {
+        data['dm'] = [];
+      }
+      data['dm'].add(_searchFieldValue.toLowerCase());
       docRef.update(data);
-    } else {
-      AlertDialog(
-        title: const Text('エラー'),
-        content: const Text('ユーザーが見つかりませんでした'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      );
+      final docRef2 = userData.doc(_searchFieldValue.toLowerCase());
+      final docSnapshot2 = await docRef2.get();
+      if (docSnapshot2.exists) {
+        final data2 = docSnapshot2.data() as Map<String, dynamic>;
+        if (data2['dm'] == null) {
+          data2['dm'] = [];
+        }
+        data2['dm'].add(userId);
+        docRef2.update(data2);
+      }
     }
   }
 
@@ -135,66 +135,84 @@ class _CreateDmState extends State<CreateDm> {
         backgroundColor: const Color(0xFFF0F5FA),
       ),
       backgroundColor: const Color(0xFFF0F5FA),
-      body: Column(
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: MaterialButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                minWidth: 0,
-                child: const Padding(
-                  padding: EdgeInsets.all(5),
-                  child: Icon(
-                    Icons.arrow_back,
-                    size: 30,
-                    color: Colors.black,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: MaterialButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    Navigator.pop(context);
+                  },
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  minWidth: 0,
+                  child: const Padding(
+                    padding: EdgeInsets.all(5),
+                    child: Icon(
+                      Icons.arrow_back,
+                      size: 30,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: SearchField(
-              controller: _searchFieldController,
-              hint: 'Basic SearchField',
-              suggestions:
-                  suggestions.map(SearchFieldListItem<String>.new).toList(),
-              suggestionState: Suggestion.expand,
-              maxSuggestionsInViewPort: 10,
-              suggestionsDecoration: SuggestionDecoration(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              scrollbarDecoration: ScrollbarDecoration(
-                thickness: 0,
+            Container(
+              width: 600,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                child: SearchField(
+                  controller: _searchFieldController,
+                  hint: 'Basic SearchField',
+                  suggestions:
+                      suggestions.map(SearchFieldListItem<String>.new).toList(),
+                  suggestionState: Suggestion.expand,
+                  maxSuggestionsInViewPort: 10,
+                  suggestionsDecoration: SuggestionDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  suggestionStyle: TextStyle(
+                    color: Colors.black,
+                    fontSize: 15,
+                  ),
+                  scrollbarDecoration: ScrollbarDecoration(
+                    thickness: 0,
+                  ),
+                ),
               ),
             ),
-          ),
-          const SizedBox(
-            height: 30,
-          ),
-          ElevatedButton(
-            onPressed: create_dm,
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
+            const SizedBox(
+              height: 50,
+            ),
+            Container(
+              width: 600,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ElevatedButton(
+                  onPressed: create_dm,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: const Color(0xFF3E5C79),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 20),
+                  ),
+                  child: const Text(
+                    'DMを作成',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
               ),
-              backgroundColor: const Color(0xFF3E5C79),
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
             ),
-            child: const Text(
-              'DMを作成',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
