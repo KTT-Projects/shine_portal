@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -43,6 +44,13 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) {
+                        return const GroupChatPage();
+                      }
+                    ),
+                  );
                   // Handle the tap
                 },
               ),
