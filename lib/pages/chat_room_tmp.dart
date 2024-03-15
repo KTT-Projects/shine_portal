@@ -10,18 +10,18 @@ String randomString() {
   return base64UrlEncode(values);
 }
 
-class IndivisualChatRoom extends StatefulWidget {
+class GroupChatRoom extends StatefulWidget {
   final String name;
-  IndivisualChatRoom({
+  GroupChatRoom({
     Key? key,
     required this.name,
   });
 
   @override
-  IndivisualChatRoomState createState() => IndivisualChatRoomState();
+  GroupChatRoomState createState() => GroupChatRoomState();
 }
 
-class IndivisualChatRoomState extends State<IndivisualChatRoom> {
+class GroupChatRoomState extends State<GroupChatRoom> {
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '');
 
