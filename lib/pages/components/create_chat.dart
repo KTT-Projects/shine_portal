@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shine_portal/pages/components/create_dm.dart';
+import 'package:shine_portal/pages/components/create_group.dart';
 
 class CreateChat extends StatefulWidget {
   const CreateChat({super.key});
@@ -57,6 +58,12 @@ class _CreateChatState extends State<CreateChat> {
             ),
             onTap: () {
               // Handle the tap.
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateGroup(),
+                ),
+              );
             },
           ),
         ],
