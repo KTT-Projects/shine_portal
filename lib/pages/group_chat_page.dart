@@ -69,21 +69,28 @@ class ChatRoomState extends State<GroupChatPage> {
           ),
         ],
     ),
-        body: Chat(
-          theme: const DefaultChatTheme(
-            backgroundColor: Color(0xFFF0F5FA),
-            primaryColor: Color(0xFF3E5C79),  // メッセージの背景色の変更
-            userAvatarNameColors: [Colors.black87],  // ユーザー名の文字色の変更
-            sentMessageDocumentIconColor: Color.fromARGB(221, 49, 32, 32),
-            secondaryColor: Color(0xFFFFFFFF),
-            inputBackgroundColor: Color(0xFFFFFFFF),
-            inputTextColor: Color(0xFF1C1D21)
+
+
+        body: GestureDetector(
+          onLongPress: () {
+            
+          },
+          child: Chat(
+            theme: const DefaultChatTheme(
+              backgroundColor: Color(0xFFF0F5FA),
+              primaryColor: Color(0xFF3E5C79),  // メッセージの背景色の変更
+              userAvatarNameColors: [Colors.black87],  // ユーザー名の文字色の変更
+              sentMessageDocumentIconColor: Color.fromARGB(221, 49, 32, 32),
+              secondaryColor: Color(0xFFFFFFFF),
+              inputBackgroundColor: Color(0xFFFFFFFF),
+              inputTextColor: Color(0xFF1C1D21)
+            ),
+            user: _user,
+            messages: _messages,
+            onSendPressed: _handleSendPressed,
+            showUserAvatars: true,
+            showUserNames: true,
           ),
-          user: _user,
-          messages: _messages,
-          onSendPressed: _handleSendPressed,
-          showUserAvatars: true,
-          showUserNames: true,
         ),
       );
 
