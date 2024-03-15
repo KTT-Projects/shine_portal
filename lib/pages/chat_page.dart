@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shine_portal/pages/components/chat_tile.dart';
 import 'chat_room.dart';
 import 'package:shine_portal/pages/components/create_chat.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
+
 
 // A page for creating chat rooms.
 class ChatPage extends StatefulWidget {
