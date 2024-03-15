@@ -26,7 +26,7 @@ class _ChatPageState extends State<ChatPage> {
 
   List chatRooms = [
     {
-      'name': 'ジョン',
+      'name': 'Tasuku',
       'type': 'dm',
       'latest_message': 'こんにちは！',
       'latest_time': DateTime.now().subtract(Duration(days: 1)),
@@ -38,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
       'latest_time': DateTime(2021, 10, 10, 10, 10),
     },
     {
-      'name': 'アリス',
+      'name': 'Tomoki',
       'type': 'dm',
       'latest_message': 'やあ！',
       'latest_time': DateTime.now().subtract(Duration(hours: 2)),
@@ -50,7 +50,7 @@ class _ChatPageState extends State<ChatPage> {
       'latest_time': DateTime.now().subtract(Duration(minutes: 30)),
     },
     {
-      'name': 'ボブ',
+      'name': 'Kuzuki',
       'type': 'dm',
       'latest_message': 'おはよう！',
       'latest_time': DateTime.now().subtract(Duration(days: 2)),
@@ -62,7 +62,7 @@ class _ChatPageState extends State<ChatPage> {
       'latest_time': DateTime.now().subtract(Duration(hours: 1)),
     },
     {
-      'name': 'サラ',
+      'name': 'Hayato',
       'type': 'dm',
       'latest_message': '明日暇？',
       'latest_time': DateTime.now().subtract(Duration(days: 3)),
@@ -74,7 +74,7 @@ class _ChatPageState extends State<ChatPage> {
       'latest_time': DateTime.now().subtract(Duration(days: 1, hours: 6)),
     },
     {
-      'name': 'デビッド',
+      'name': 'Rikuta',
       'type': 'dm',
       'latest_message': '久しぶり！',
       'latest_time': DateTime.now().subtract(Duration(days: 1, hours: 12)),
