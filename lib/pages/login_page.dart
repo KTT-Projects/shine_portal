@@ -79,7 +79,7 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: Center(
-          child: Container(
+          child: SizedBox(
             width: 430,
             child: SingleChildScrollView(
               child: Column(
