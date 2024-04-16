@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:searchfield/searchfield.dart';
-import 'package:shine_portal/pages/chat_room_tmp.dart';
+import 'package:shine_portal/pages/chat_room.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
 
 class CreateGroup extends StatefulWidget {
   const CreateGroup({Key? key}) : super(key: key);
@@ -21,9 +22,7 @@ class _CreateGroupState extends State<CreateGroup> {
   final db = FirebaseFirestore.instance;
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
-
   bool isLoading = false; // Added loading state
-
   List users = [];
 
   Future add_user() async {
@@ -133,6 +132,7 @@ class _CreateGroupState extends State<CreateGroup> {
       });
       return;
     }
+
     CollectionReference userData = db.collection('userData');
     final docRef = userData.doc(userId);
     final docSnapshot = await docRef.get();
@@ -140,12 +140,13 @@ class _CreateGroupState extends State<CreateGroup> {
     if (data['group'] == null) {
       data['group'] = [];
     }
+    users.add(userId);
     CollectionReference group = db.collection('group');
     final newDocRef = await group.add({
-      'messages': 'グループが作成されました',
-      'time': DateTime.now(),
+      'messages': ['グループが作成されました'],
+      'time': [DateTime.now()],
       'users': users,
-      'sender': userId,
+      'sender': [userId],
       'name': _textFieldValue,
     });
     final newDocId = newDocRef.id;
@@ -170,9 +171,9 @@ class _CreateGroupState extends State<CreateGroup> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => GroupChatRoom(
-          name: _textFieldValue,
-        ),
+        builder: (context) => GroupChatPage(
+            // name: _textFieldValue,
+            ),
       ),
     );
   }
