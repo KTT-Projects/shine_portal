@@ -150,9 +150,6 @@ class _CreateGroupState extends State<CreateGroup> {
       'name': _textFieldValue,
     });
     final newDocId = newDocRef.id;
-    data['group'].add(newDocId);
-    docRef.update(data);
-    // Add the group to each user's data
     CollectionReference userData2 = db.collection('userData');
     for (var user in users) {
       final docRef2 = userData2.doc(user);
@@ -172,8 +169,8 @@ class _CreateGroupState extends State<CreateGroup> {
       context,
       MaterialPageRoute(
         builder: (context) => GroupChatPage(
-            // name: _textFieldValue,
-            ),
+          name: _textFieldValue,
+        ),
       ),
     );
   }

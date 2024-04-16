@@ -121,7 +121,7 @@ class _CreateDmState extends State<CreateDm> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IndivisualChatRoom(
+        builder: (context) => IndividualChatRoom(
           name: capitalize(_searchFieldValue.toLowerCase()),
         ),
       ),

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
+import 'package:shine_portal/pages/setting_chat.dart';
 
 String randomString() {
   final random = Random.secure();
@@ -10,18 +11,18 @@ String randomString() {
   return base64UrlEncode(values);
 }
 
-class IndivisualChatRoom extends StatefulWidget {
+class IndividualChatRoom extends StatefulWidget {
   final String name;
-  IndivisualChatRoom({
+  IndividualChatRoom({
     Key? key,
     required this.name,
   });
 
   @override
-  IndivisualChatRoomState createState() => IndivisualChatRoomState();
+  IndividualChatRoomState createState() => IndividualChatRoomState();
 }
 
-class IndivisualChatRoomState extends State<IndivisualChatRoom> {
+class IndividualChatRoomState extends State<IndividualChatRoom> {
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '');
 
@@ -46,13 +47,15 @@ class IndivisualChatRoomState extends State<IndivisualChatRoom> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           backgroundColor: Color(0xFFF0F5FA),
-          title: Text(widget.name),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.more_vert),
-              onPressed: () {},
+          title: Text(
+            widget.name,
+            style: TextStyle(
+              color: Colors.black87,
             ),
-          ],
+          ),
+          iconTheme: IconThemeData(
+            color: Colors.black87,
+          ),
         ),
         body: Chat(
           // 追加

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:shine_portal/pages/chat_room.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
 
 class ChatTile extends StatefulWidget {
   final String name;
@@ -61,12 +62,21 @@ class _ChatTileState extends State<ChatTile> {
         child: GestureDetector(
           onTap: () {
             // Navigate to the chat page
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => IndivisualChatRoom(name: widget.name),
-              ),
-            );
+            if (widget.type == 'dm') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IndividualChatRoom(name: widget.name),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GroupChatPage(name: widget.name),
+                ),
+              );
+            }
           },
           child: Card(
             color: const Color(0xFFF0F5FA),
