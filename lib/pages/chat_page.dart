@@ -34,11 +34,6 @@ class _ChatPageState extends State<ChatPage> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
-  // sort chat rooms by latest time
-  void sortChatRooms() {
-    // chatRooms.sort((a, b) => b['latest_time'].compareTo(a['latest_time']));
-  }
-
   @override
   void initState() {
     super.initState();
@@ -169,14 +164,46 @@ class _ChatPageState extends State<ChatPage> {
                                           doc.id == groupIds[index])['name'],
                                   'type': 'group',
                                 };
-                                chatRooms.add(chatRoom);
+                                for (var index = 0;
+                                    index < groupIds.length;
+                                    index++) {
+                                  final chatRoom = {
+                                    'groupId': groupIds[index],
+                                    'message': snapshot.data!.docs
+                                        .firstWhere((doc) =>
+                                            doc.id ==
+                                            groupIds[index])['messages']
+                                        .last,
+                                    'time': snapshot.data!.docs
+                                        .firstWhere((doc) =>
+                                            doc.id == groupIds[index])['time']
+                                        .last,
+                                    'name': snapshot.data!.docs.firstWhere(
+                                        (doc) =>
+                                            doc.id == groupIds[index])['name'],
+                                    'type': 'group',
+                                  };
+
+                                  // Check if the chat room already exists
+                                  final existingChatRoomIndex =
+                                      chatRooms.indexWhere((room) =>
+                                          room['groupId'] == groupIds[index]);
+                                  if (existingChatRoomIndex != -1) {
+                                    // Update the existing chat room
+                                    chatRooms[existingChatRoomIndex] = chatRoom;
+                                  } else {
+                                    // Add the new chat room
+                                    chatRooms.add(chatRoom);
+                                  }
+                                }
+                                // chatRooms.add(chatRoom);
                               }
                               chatRooms.sort(
                                   (a, b) => b['time'].compareTo(a['time']));
                               return ListView.builder(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 5),
-                                itemCount: dmNames.length,
+                                itemCount: dmNames.length + groupIds.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   final chatRoom = chatRooms[index];
                                   return ChatTile(
