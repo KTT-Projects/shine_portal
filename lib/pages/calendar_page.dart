@@ -12,24 +12,6 @@ class CalendarPage extends StatefulWidget {
 }
 
 class _CalendarPageState extends State<CalendarPage> {
-  final List<Map<dynamic, dynamic>> _input = [
-    {
-      'title': '研修名',
-      'time': false,
-    },
-    {
-      'title': '開始時間',
-      'time': true,
-    },
-    {
-      'title': '終了時間',
-      'time': true,
-    },
-    {
-      'title': '内容',
-      'time': false
-    }
-  ];
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
   // final events = {
@@ -78,16 +60,17 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   List<Map<String, Object>> _selectedEvents = [];
-  TimeOfDay _selectedTime = TimeOfDay.now();
+  final List<TimeOfDay> _selectedTime = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
+  List<TimeOfDay> picked = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
 
   void saveNewEvent(String value) {
     print(value);
   }
 
-  Future<void> _selectTime(BuildContext context) async {
-    final TimeOfDay? picked = await showTimePicker(
+  Future<void> _selectTime(BuildContext context, int index) async {
+    picked[index] = (await showTimePicker(
       context: context,
-      initialTime: _selectedTime,
+      initialTime: _selectedTime[index],
       initialEntryMode: TimePickerEntryMode.inputOnly,
       builder: (context, child) {
         return MediaQuery(
@@ -95,13 +78,14 @@ class _CalendarPageState extends State<CalendarPage> {
           child: child!,
         );
       },
-    );
+    ))!;
     if (picked != null) {
       setState(() {
-        _selectedTime = picked;
-        _controllers[1].text = 'aaa';
+        _selectedTime[index] = picked[index];
+        _controllers[index].text = _selectedTime[index].format(context);
       });
     }
+    print(picked);
   }
 
   @override
@@ -268,47 +252,72 @@ class _CalendarPageState extends State<CalendarPage> {
                         color: Theme.of(context).colorScheme.onBackground,
                       ),
                     ),
-                    for (int i = 0; i < _input.length; i++) ...{
-                      if (_input[i]['time'] == false) ...{
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: SizedBox(
-                            height: 50,
-                            child: TextField(
-                              autofocus: true,
-                              controller: _controllers[i],
-                              decoration: InputDecoration(
-                                labelText: _input[i]['title'],
-                                isDense: true,
-                              ),
-                            ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        height: 50,
+                        child: TextField(
+                          autofocus: true,
+                          controller: _controllers[0],
+                          decoration: InputDecoration(
+                            labelText: '研修名',
+                            isDense: true,
                           ),
-                        )
-                      } else if (_input[i]['time'] == true) ...{
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10),
-                          child: SizedBox(
-                            height: 50,
-                            child: TextField(
-                              autofocus: true,
-                              controller: _controllers[i],
-                              decoration: InputDecoration(
-                                labelText: _input[i]['title'],
-                                isDense: true,
-                              ),
-                              onTap: () {
-                                _selectTime(context);
-                              },
-                            ),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        height: 50,
+                        child: TextField(
+                          autofocus: true,
+                          controller: _controllers[1],
+                          decoration: InputDecoration(
+                            labelText: '開始時間',
+                            isDense: true,
                           ),
-                        )
-                      }
-                    },
+                          onTap: () {
+                            _selectTime(context, 1);
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        height: 50,
+                        child: TextField(
+                          autofocus: true,
+                          controller: _controllers[2],
+                          decoration: InputDecoration(
+                            labelText: '終了時間',
+                            isDense: true,
+                          ),
+                          onTap: () {
+                            _selectTime(context, 2);
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10),
+                      child: SizedBox(
+                        height: 50,
+                        child: TextField(
+                          autofocus: true,
+                          controller: _controllers[3],
+                          decoration: InputDecoration(
+                            labelText: '内容',
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ),
                     MaterialButton(
                       onPressed: () {
                         saveNewEvent(_controllers[0].text);
                         Navigator.of(context).pop();
-
                       },
                       child: const Text('追加'),
                     ),
