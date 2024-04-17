@@ -25,7 +25,8 @@ class IndividualChatRoom extends StatefulWidget {
 }
 
 class IndividualChatRoomState extends State<IndividualChatRoom> {
-  // final userId = FirebaseAuth.instance.currentUser!;
+  String userId =
+      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '');
 
@@ -141,7 +142,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
       final time = List<Timestamp>.from(doc.data()!['time']);
 
       messages.add(textMessage.text);
-      sender.add('userId');
+      sender.add(userId);
       time.add(Timestamp.fromDate(DateTime.now()));
 
       db.collection('dm').doc(widget.dmId).update({
