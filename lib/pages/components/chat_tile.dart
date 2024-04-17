@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:shine_portal/pages/chat_room.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
 
 class ChatTile extends StatefulWidget {
   final String name;
   final String type;
   final String latest_message;
   final DateTime latest_time;
+  final String chatId;
   Function(BuildContext)? deleteChat;
 
   ChatTile({
@@ -16,6 +18,7 @@ class ChatTile extends StatefulWidget {
     required this.type,
     required this.latest_message,
     required this.latest_time,
+    required this.chatId,
     this.deleteChat,
   });
 
@@ -61,12 +64,24 @@ class _ChatTileState extends State<ChatTile> {
         child: GestureDetector(
           onTap: () {
             // Navigate to the chat page
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => IndivisualChatRoom(name: widget.name),
-              ),
-            );
+            if (widget.type == 'dm') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IndividualChatRoom(
+                    name: widget.name,
+                    dmId: widget.chatId,
+                  ),
+                ),
+              );
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => GroupChatPage(name: widget.name),
+                ),
+              );
+            }
           },
           child: Card(
             color: const Color(0xFFF0F5FA),

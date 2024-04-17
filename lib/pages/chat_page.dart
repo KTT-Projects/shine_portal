@@ -34,29 +34,9 @@ class _ChatPageState extends State<ChatPage> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
-  // List<String> dmIds = [];
-
-  // Stream<List<String>> getDMIdsStream() {
-  //   return db
-  //       .collection('userData')
-  //       .doc(userId)
-  //       .snapshots()
-  //       .map((event) => List<String>.from(event['dmId']));
-  // }
-
-  // sort chat rooms by latest time
-  void sortChatRooms() {
-    // chatRooms.sort((a, b) => b['latest_time'].compareTo(a['latest_time']));
-  }
-
   @override
   void initState() {
     super.initState();
-    // getDMIdsStream().listen((ids) {
-    //   setState(() {
-    //     dmIds = ids;
-    //   });
-    // });
   }
 
   @override
@@ -102,58 +82,150 @@ class _ChatPageState extends State<ChatPage> {
                   .firstWhere((doc) => doc.id == userId)['dmId']);
               final dmNames = List<String>.from(snapshot.data!.docs
                   .firstWhere((doc) => doc.id == userId)['dm']);
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 5),
-                itemCount: dmNames.length,
-                itemBuilder: (BuildContext context, int index) {
-                  final chatRoom = capitalize(dmNames[index]);
-                  // final chatRoomId = chatRoom.id;
-                  // final chatRoomName = chatRoom['name'];
-                  // final chatRoomType = chatRoom['type'];
-                  // final chatRoomLatestMessage = chatRoom['latest_message'];
-                  // final chatRoomLatestTime = chatRoom['latest_time'];
+              final groupIds = List<String>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == userId)['group']);
 
-                  // if (chatRoomType == 'dm') {
-                  //   if (dmIds.contains(chatRoomId)) {
-                  //     return ChatTile(
-                  //       name: chatRoomName,
-                  //       type: chatRoomType,
-                  //       latest_message: chatRoomLatestMessage,
-                  //       latest_time: chatRoomLatestTime,
-                  //     );
-                  //   }
-                  // } else {
-                  //   return ChatTile(
-                  //     name: chatRoomName,
-                  //     type: chatRoomType,
-                  //     latest_message: chatRoomLatestMessage,
-                  //     latest_time: chatRoomLatestTime,
-                  //   );
-                  // }
-                  return ChatTile(
-                      name: chatRoom,
-                      type: 'dm',
-                      latest_message: 'latest_message',
-                      latest_time: DateTime.now());
-                },
-              );
+              // Get the latest message and time from DMs
+              return StreamBuilder<QuerySnapshot>(
+                  stream: db.collection('userData').snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return const Text('エラーが発生しました');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    final chatRooms = [];
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: db.collection('dm').snapshots(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<QuerySnapshot> snapshot) {
+                        if (snapshot.hasError) {
+                          return const Text('エラーが発生しました');
+                        }
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        final chatRooms = [];
+                        for (var index = 0; index < dmNames.length; index++) {
+                          final chatRoom = {
+                            'dmId': dmIds[index],
+                            'message': snapshot.data!.docs
+                                .firstWhere(
+                                    (doc) => doc.id == dmIds[index])['messages']
+                                .last,
+                            'time': snapshot.data!.docs
+                                .firstWhere(
+                                    (doc) => doc.id == dmIds[index])['time']
+                                .last,
+                            'name': capitalize(dmNames[index]),
+                            'type': 'dm',
+                          };
+                          chatRooms.add(chatRoom);
+                        }
+
+                        // Get the latest message and time from groups
+                        return StreamBuilder<QuerySnapshot>(
+                            stream: db.collection('group').snapshots(),
+                            builder: (BuildContext context,
+                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                              if (snapshot.hasError) {
+                                return const Text('エラーが発生しました');
+                              }
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              }
+                              for (var index = 0;
+                                  index < groupIds.length;
+                                  index++) {
+                                final chatRoom = {
+                                  'groupId': groupIds[index],
+                                  'message': snapshot.data!.docs
+                                      .firstWhere((doc) =>
+                                          doc.id == groupIds[index])['messages']
+                                      .last,
+                                  'time': snapshot.data!.docs
+                                      .firstWhere((doc) =>
+                                          doc.id == groupIds[index])['time']
+                                      .last,
+                                  'name': snapshot.data!.docs.firstWhere(
+                                      (doc) =>
+                                          doc.id == groupIds[index])['name'],
+                                  'type': 'group',
+                                };
+                                for (var index = 0;
+                                    index < groupIds.length;
+                                    index++) {
+                                  final chatRoom = {
+                                    'groupId': groupIds[index],
+                                    'message': snapshot.data!.docs
+                                        .firstWhere((doc) =>
+                                            doc.id ==
+                                            groupIds[index])['messages']
+                                        .last,
+                                    'time': snapshot.data!.docs
+                                        .firstWhere((doc) =>
+                                            doc.id == groupIds[index])['time']
+                                        .last,
+                                    'name': snapshot.data!.docs.firstWhere(
+                                        (doc) =>
+                                            doc.id == groupIds[index])['name'],
+                                    'type': 'group',
+                                  };
+
+                                  // Check if the chat room already exists
+                                  final existingChatRoomIndex =
+                                      chatRooms.indexWhere((room) =>
+                                          room['groupId'] == groupIds[index]);
+                                  if (existingChatRoomIndex != -1) {
+                                    // Update the existing chat room
+                                    chatRooms[existingChatRoomIndex] = chatRoom;
+                                  } else {
+                                    // Add the new chat room
+                                    chatRooms.add(chatRoom);
+                                  }
+                                }
+                                // chatRooms.add(chatRoom);
+                              }
+                              chatRooms.sort(
+                                  (a, b) => b['time'].compareTo(a['time']));
+                              return ListView.builder(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 5),
+                                itemCount: dmNames.length + groupIds.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final chatRoom = chatRooms[index];
+                                  return ChatTile(
+                                      name: chatRoom['name'],
+                                      type: chatRoom['type'],
+                                      latest_message: chatRoom['message'],
+                                      latest_time:
+                                          DateTime.fromMicrosecondsSinceEpoch(
+                                              chatRoom['time']
+                                                  .microsecondsSinceEpoch),
+                                      chatId: chatRoom['type'] == 'dm'
+                                          ? chatRoom['dmId']
+                                          : chatRoom['groupId']);
+                                },
+                              );
+                            });
+                      },
+                    );
+                  });
             },
           ),
         ),
-        // Expanded(
-        //   child: ListView.builder(
-        //     padding: EdgeInsets.symmetric(vertical: 5),
-        //     itemCount: chatRooms.length,
-        //     itemBuilder: (BuildContext context, int index) {
-        //       return ChatTile(
-        //         name: chatRooms[index]['name'],
-        //         type: chatRooms[index]['type'],
-        //         latest_message: chatRooms[index]['latest_message'],
-        //         latest_time: chatRooms[index]['latest_time'],
-        //       );
-        //     },
-        //   ),
-        // ),
       ]),
     );
   }
