@@ -41,13 +41,19 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0,
+<<<<<<< HEAD
         backgroundColor: Color(0xFFF0F5FA),
       ),
       backgroundColor: const Color(0xFFF0F5FA),
+=======
+        backgroundColor: Theme.of(context).colorScheme.background,
+      ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+>>>>>>> origin/calendar
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white, boxShadow: [
-          BoxShadow(blurRadius: 20, color: Colors.black.withOpacity(.1))
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, boxShadow: [
+          BoxShadow(blurRadius: 20, color: Theme.of(context).colorScheme.onBackground.withOpacity(.1)),
         ]),
         child: Padding(
           padding:
@@ -55,7 +61,8 @@ class _HomePageState extends State<HomePage> {
           child: GNav(
             haptic: true,
             tabBorderRadius: 35,
-            tabBackgroundColor: const Color(0x2F3E5C79),
+            tabBackgroundColor: Theme.of(context).colorScheme.primary.withOpacity(.1),
+            // tabBackgroundColor: Theme.of(context).colorScheme.primaryContainer,
             duration: const Duration(milliseconds: 300),
             gap: 10,
             mainAxisAlignment: MainAxisAlignment.center,
