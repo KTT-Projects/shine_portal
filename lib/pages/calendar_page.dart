@@ -79,13 +79,6 @@ class _CalendarPageState extends State<CalendarPage> {
         );
       },
     ))!;
-    if (picked != null) {
-      setState(() {
-        _selectedTime[index] = picked[index];
-        _controllers[index].text = _selectedTime[index].format(context);
-      });
-    }
-    print(picked);
   }
 
   @override
