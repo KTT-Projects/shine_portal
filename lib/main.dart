@@ -22,8 +22,19 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3E5C79)),
-        fontFamily: GoogleFonts.mPlus1p().fontFamily,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF3E5C79),
+          primary: const Color(0xFF3E5C79),
+          background: const Color(0xFFF0F5FA),
+        ),
+        // fontFamily: GoogleFonts.mPlus1p().fontFamily,
+        textTheme: GoogleFonts.mPlus1pTextTheme(),
+      ),
+      darkTheme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF3E5C79),
+          brightness: Brightness.dark,
+        ),
       ),
       home: const MainPage(),
     );

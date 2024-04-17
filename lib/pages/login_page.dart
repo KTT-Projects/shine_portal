@@ -77,9 +77,9 @@ class _LoginPageState extends State<LoginPage> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: const Color(0xffF0F5FA),
+        backgroundColor: Theme.of(context).colorScheme.background,
         body: Center(
-          child: Container(
+          child: SizedBox(
             width: 430,
             child: SingleChildScrollView(
               child: Column(
