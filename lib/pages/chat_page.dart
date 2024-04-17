@@ -180,14 +180,16 @@ class _ChatPageState extends State<ChatPage> {
                                 itemBuilder: (BuildContext context, int index) {
                                   final chatRoom = chatRooms[index];
                                   return ChatTile(
-                                    name: chatRoom['name'],
-                                    type: chatRoom['type'],
-                                    latest_message: chatRoom['message'],
-                                    latest_time:
-                                        DateTime.fromMicrosecondsSinceEpoch(
-                                            chatRoom['time']
-                                                .microsecondsSinceEpoch),
-                                  );
+                                      name: chatRoom['name'],
+                                      type: chatRoom['type'],
+                                      latest_message: chatRoom['message'],
+                                      latest_time:
+                                          DateTime.fromMicrosecondsSinceEpoch(
+                                              chatRoom['time']
+                                                  .microsecondsSinceEpoch),
+                                      chatId: chatRoom['type'] == 'dm'
+                                          ? chatRoom['dmId']
+                                          : chatRoom['groupId']);
                                 },
                               );
                             });

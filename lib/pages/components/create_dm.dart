@@ -25,7 +25,7 @@ class _CreateDmState extends State<CreateDm> {
     setState(() {
       isLoading = true; // Show loading indicator
     });
-
+    String dmId_ = '';
     bool flag = false;
     _searchFieldValue = _searchFieldController.text;
     if (_searchFieldValue == '') {
@@ -113,6 +113,7 @@ class _CreateDmState extends State<CreateDm> {
         data2['dmId'].add(newDocId);
         docRef2.update(data2);
       }
+      dmId_ = newDocId;
     }
     setState(() {
       isLoading = false; // Hide loading indicator
@@ -123,6 +124,7 @@ class _CreateDmState extends State<CreateDm> {
       MaterialPageRoute(
         builder: (context) => IndividualChatRoom(
           name: capitalize(_searchFieldValue.toLowerCase()),
+          dmId: dmId_,
         ),
       ),
     );

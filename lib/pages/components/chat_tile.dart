@@ -9,6 +9,7 @@ class ChatTile extends StatefulWidget {
   final String type;
   final String latest_message;
   final DateTime latest_time;
+  final String chatId;
   Function(BuildContext)? deleteChat;
 
   ChatTile({
@@ -17,6 +18,7 @@ class ChatTile extends StatefulWidget {
     required this.type,
     required this.latest_message,
     required this.latest_time,
+    required this.chatId,
     this.deleteChat,
   });
 
@@ -66,7 +68,10 @@ class _ChatTileState extends State<ChatTile> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => IndividualChatRoom(name: widget.name),
+                  builder: (context) => IndividualChatRoom(
+                    name: widget.name,
+                    dmId: widget.chatId,
+                  ),
                 ),
               );
             } else {
