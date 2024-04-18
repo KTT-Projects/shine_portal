@@ -1,16 +1,9 @@
-import 'dart:convert';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-
-String randomString() {
-  final random = Random.secure();
-  final values = List<int>.generate(16, (i) => random.nextInt(255));
-  return base64UrlEncode(values);
-}
 
 class IndividualChatRoom extends StatefulWidget {
   final String name, dmId;
@@ -59,12 +52,6 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
   @override
   void initState() {
     super.initState();
-    // _addMessage(types.TextMessage(
-    //   author: _other,
-    //   createdAt: DateTime.now().millisecondsSinceEpoch,
-    //   id: randomString(),
-    //   text: "テストです。",
-    // ));
   }
 
   final user = FirebaseAuth.instance.currentUser!;
@@ -123,17 +110,11 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
             }),
       );
 
-  // void _addMessage(types.Message message) {
-  //   setState(() {
-  //     _messages.insert(0, message);
-  //   });
-  // }
-
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: randomString(),
+      id: _messages.length.toString(),
       text: message.text,
     );
     db.collection('dm').doc(widget.dmId).get().then((doc) {

@@ -1,21 +1,17 @@
-import 'dart:convert';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 import 'package:shine_portal/pages/setting_chat.dart';
 
-String randomString() {
-  final random = Random.secure();
-  final values = List<int>.generate(16, (i) => random.nextInt(255));
-  return base64UrlEncode(values);
-}
-
 class GroupChatPage extends StatefulWidget {
-  final String name;
+  final String name, groupId;
   GroupChatPage({
     Key? key,
     required this.name,
+    required this.groupId,
   });
 
   @override
@@ -23,27 +19,49 @@ class GroupChatPage extends StatefulWidget {
 }
 
 class ChatRoomState extends State<GroupChatPage> {
+  String userId =
+      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _messages = [];
-  final _user = const types.User(id: '82091008-a484-4a89-ae75-a22bf8d6f3ac');
+  final _user = const types.User(id: '');
 
-//他のユーザーの情報を取得
-  final _other = const types.User(
-    id: 'otheruser',
-    firstName: "テスト",
-    lastName: "test",
-  );
+  // Capitalize the first letter of a string
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
+  void _addMessage(String author, String message, String id, final time) {
+    // Define the other user
+    final _other = types.User(
+      id: author,
+      firstName: capitalize(author),
+    );
+    final types.TextMessage textMessage;
+    if (author != userId) {
+      textMessage = types.TextMessage(
+        author: _other,
+        createdAt: time.toDate().millisecondsSinceEpoch,
+        id: id,
+        text: message,
+      );
+    } else {
+      textMessage = types.TextMessage(
+        author: _user,
+        createdAt: time.toDate().millisecondsSinceEpoch,
+        id: id,
+        text: message,
+      );
+    }
+    _messages.insert(0, textMessage);
+  }
 
   @override
   void initState() {
     super.initState();
-    _addMessage(types.TextMessage(
-      author: _other,
-      createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: randomString(),
-      text: "テストです。",
-      status: types.Status.delivered,
-    ));
   }
+
+  final user = FirebaseAuth.instance.currentUser!;
+  final db = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -70,40 +88,66 @@ class ChatRoomState extends State<GroupChatPage> {
             ),
           ],
         ),
-        body: GestureDetector(
-          onLongPress: () {},
-          child: Chat(
-            theme: const DefaultChatTheme(
-                backgroundColor: Color(0xFFF0F5FA),
-                primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
-                userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
-                sentMessageDocumentIconColor: Color.fromARGB(221, 49, 32, 32),
-                secondaryColor: Color(0xFFFFFFFF),
-                inputBackgroundColor: Color(0xFFFFFFFF),
-                inputTextColor: Color(0xFF1C1D21)),
-            user: _user,
-            messages: _messages,
-            onSendPressed: _handleSendPressed,
-            showUserAvatars: true,
-            showUserNames: true,
-          ),
-        ),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: db.collection('group').snapshots(),
+            builder: (context, snapshot) {
+              _messages.clear();
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final messages = List<String>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.groupId)['messages']);
+              final sender = List<String>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.groupId)['sender']);
+              final time = List<Timestamp>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.groupId)['time']);
+              for (var i = 0;
+                  i < min(messages.length, min(sender.length, time.length));
+                  i++) {
+                _addMessage(sender[i], messages[i], i.toString(), time[i]);
+              }
+              return Chat(
+                theme: const DefaultChatTheme(
+                    backgroundColor: Color(0xFFF0F5FA),
+                    primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
+                    userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
+                    sentMessageDocumentIconColor:
+                        Color.fromARGB(221, 49, 32, 32),
+                    secondaryColor: Color(0xFFFFFFFF),
+                    inputBackgroundColor: Color(0xFFFFFFFF),
+                    inputTextColor: Color(0xFF1C1D21)),
+                user: _user,
+                messages: _messages,
+                onSendPressed: _handleSendPressed,
+                showUserAvatars: true,
+                showUserNames: true,
+              );
+            }),
       );
-
-  void _addMessage(types.Message message) {
-    setState(() {
-      _messages.insert(0, message);
-    });
-  }
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: randomString(),
+      id: _messages.length.toString(),
       text: message.text,
     );
+    db.collection('group').doc(widget.groupId).get().then((doc) {
+      final messages = List<String>.from(doc.data()!['messages']);
+      final sender = List<String>.from(doc.data()!['sender']);
+      final time = List<Timestamp>.from(doc.data()!['time']);
 
-    _addMessage(textMessage);
+      messages.add(textMessage.text);
+      sender.add(userId);
+      time.add(Timestamp.fromDate(DateTime.now()));
+
+      db.collection('group').doc(widget.groupId).update({
+        'messages': messages,
+        'sender': sender,
+        'time': time,
+      });
+    });
   }
 }
