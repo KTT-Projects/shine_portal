@@ -143,7 +143,7 @@ class _CreateGroupState extends State<CreateGroup> {
     users.add(userId);
     CollectionReference group = db.collection('group');
     final newDocRef = await group.add({
-      'messages': ['グループが作成されました'],
+      'messages': ['システム: グループが作成されました'],
       'time': [DateTime.now()],
       'users': users,
       'sender': [userId],
@@ -170,6 +170,7 @@ class _CreateGroupState extends State<CreateGroup> {
       MaterialPageRoute(
         builder: (context) => GroupChatPage(
           name: _textFieldValue,
+          groupId: newDocId,
         ),
       ),
     );

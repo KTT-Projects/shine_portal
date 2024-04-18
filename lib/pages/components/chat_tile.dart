@@ -78,7 +78,10 @@ class _ChatTileState extends State<ChatTile> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => GroupChatPage(name: widget.name),
+                  builder: (context) => GroupChatPage(
+                    name: widget.name,
+                    groupId: widget.chatId,
+                  ),
                 ),
               );
             }
