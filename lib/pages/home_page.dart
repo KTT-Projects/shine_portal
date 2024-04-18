@@ -55,6 +55,7 @@ class _HomePageState extends State<HomePage> {
       userData.doc(userId).set({
         'dm': [],
         'group': [],
+        'dmId': [],
       });
     }
   }
