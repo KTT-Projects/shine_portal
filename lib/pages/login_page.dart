@@ -79,13 +79,8 @@ class _LoginPageState extends State<LoginPage> {
       child: Scaffold(
         backgroundColor: Theme.of(context).colorScheme.background,
         body: Center(
-<<<<<<< HEAD
-          child: Container(
-            width: 500,
-=======
           child: SizedBox(
             width: 430,
->>>>>>> origin/calendar
             child: SingleChildScrollView(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

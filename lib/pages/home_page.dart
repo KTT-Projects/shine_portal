@@ -41,15 +41,9 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0,
-<<<<<<< HEAD
-        backgroundColor: Color(0xFFF0F5FA),
-      ),
-      backgroundColor: const Color(0xFFF0F5FA),
-=======
         backgroundColor: Theme.of(context).colorScheme.background,
       ),
       backgroundColor: Theme.of(context).colorScheme.background,
->>>>>>> origin/calendar
       body: pages[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: Theme.of(context).colorScheme.background, boxShadow: [
