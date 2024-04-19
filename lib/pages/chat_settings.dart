@@ -3,16 +3,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:searchfield/searchfield.dart';
-import 'package:shine_portal/pages/group_chat_page.dart';
 
-class CreateGroup extends StatefulWidget {
-  const CreateGroup({super.key});
+class ChatSettings extends StatefulWidget {
+  final String name, groupId;
+  final List<String> users;
+  const ChatSettings({
+    super.key,
+    required this.name,
+    required this.groupId,
+    required this.users,
+  });
 
   @override
-  State<CreateGroup> createState() => _CreateGroupState();
+  State<ChatSettings> createState() => _ChatSettingsState();
 }
 
-class _CreateGroupState extends State<CreateGroup> {
+class _ChatSettingsState extends State<ChatSettings> {
   final user = FirebaseAuth.instance.currentUser!;
   final TextEditingController _searchFieldController = TextEditingController();
   final TextEditingController _textFieldController = TextEditingController();
@@ -28,7 +34,6 @@ class _CreateGroupState extends State<CreateGroup> {
     setState(() {
       isLoading = true; // Show loading indicator
     });
-
     bool flag = false;
     _searchFieldValue = _searchFieldController.text;
     if (_searchFieldValue == '') {
@@ -92,7 +97,7 @@ class _CreateGroupState extends State<CreateGroup> {
     });
   }
 
-  Future create_group() async {
+  Future modify_group() async {
     _textFieldValue = _textFieldController.text;
     setState(() {
       isLoading = true; // Show loading indicator
@@ -131,43 +136,87 @@ class _CreateGroupState extends State<CreateGroup> {
       });
       return;
     }
-
-    CollectionReference userData = db.collection('userData');
-    userData.doc(userId);
     users.add(userId);
-    CollectionReference group = db.collection('group');
-    final newDocRef = await group.add({
-      'messages': ['システム: グループが作成されました'],
-      'time': [DateTime.now()],
-      'users': users,
-      'sender': [userId],
-      'name': _textFieldValue,
-    });
-    final newDocId = newDocRef.id;
-    CollectionReference userData2 = db.collection('userData');
-    for (var user in users) {
-      final docRef2 = userData2.doc(user);
-      final docSnapshot2 = await docRef2.get();
-      final data2 = docSnapshot2.data() as Map<String, dynamic>;
-      if (data2['group'] == null) {
-        data2['group'] = [];
+    List messages, sender, time, usersList, newUsers = [], deletedUsers = [];
+    bool flag = false;
+    db.collection('group').doc(widget.groupId).get().then((doc) {
+      messages = List<String>.from(doc.data()!['messages']);
+      sender = List<String>.from(doc.data()!['sender']);
+      time = List<Timestamp>.from(doc.data()!['time']);
+      usersList = List<String>.from(doc.data()!['users']);
+      String name = doc.data()!['name'];
+
+      // Check for new users
+      for (var user in users) {
+        if (!usersList.contains(user)) {
+          newUsers.add(user);
+        }
       }
-      data2['group'].add(newDocId);
-      docRef2.update(data2);
-    }
-    setState(() {
-      isLoading = false; // Hide loading indicator
+
+      // Check for deleted users
+      for (var user in usersList) {
+        if (!users.contains(user)) {
+          deletedUsers.add(user);
+        }
+      }
+
+      // If there are no new users, deleted users, and the group name is the same, return
+      if (newUsers.isEmpty && deletedUsers.isEmpty && name == _textFieldValue) {
+        users.remove(userId);
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              '変更がありません',
+              textAlign: TextAlign.center,
+            ),
+            backgroundColor: Color(0xFFFF6B6B),
+          ),
+        );
+        setState(() {
+          isLoading = false; // Hide loading indicator
+        });
+        flag = true;
+      }
+      print(flag);
+      if (!flag) {
+        messages.add('システム: グループ名/参加者が変更されました');
+        sender.add(userId);
+        time.add(Timestamp.fromDate(DateTime.now()));
+        usersList = users;
+        name = _textFieldValue;
+
+        db.collection('group').doc(widget.groupId).update({
+          'messages': messages,
+          'sender': sender,
+          'time': time,
+          'users': usersList,
+          'name': name,
+        });
+        for (var user in newUsers) {
+          db.collection('userData').doc(user).get().then((doc) {
+            List groups = List<String>.from(doc.data()!['group']);
+            groups.add(widget.groupId);
+            db.collection('userData').doc(user).update({
+              'group': groups,
+            });
+          });
+        }
+        for (var user in deletedUsers) {
+          db.collection('userData').doc(user).get().then((doc) {
+            List groups = List<String>.from(doc.data()!['group']);
+            groups.remove(widget.groupId);
+            db.collection('userData').doc(user).update({
+              'group': groups,
+            });
+          });
+        }
+        setState(() {
+          isLoading = false; // Hide loading indicator
+        });
+        Navigator.pop(context);
+      }
     });
-    Navigator.popUntil(context, (route) => route.isFirst);
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => GroupChatPage(
-          name: _textFieldValue,
-          groupId: newDocId,
-        ),
-      ),
-    );
   }
 
   // Capitalize the first letter of a string
@@ -181,6 +230,9 @@ class _CreateGroupState extends State<CreateGroup> {
   @override
   void initState() {
     super.initState();
+    users = widget.users;
+    users.remove(userId);
+    _textFieldController.text = widget.name;
     fetchSuggestions();
   }
 
@@ -249,8 +301,8 @@ class _CreateGroupState extends State<CreateGroup> {
                   child: TextField(
                     maxLength: 20,
                     controller: _textFieldController,
-                    decoration: const InputDecoration(
-                      hintText: 'グループ名を入力してください',
+                    decoration: InputDecoration(
+                      labelText: 'グループ名',
                     ),
                   ),
                 ),
@@ -319,7 +371,7 @@ class _CreateGroupState extends State<CreateGroup> {
                 height: 40,
               ),
               const Text(
-                '- 追加ユーザーの一覧 -',
+                '- グループ参加者 -',
                 style: TextStyle(
                   fontSize: 15,
                 ),
@@ -361,7 +413,7 @@ class _CreateGroupState extends State<CreateGroup> {
                   child: ElevatedButton(
                     onPressed: isLoading
                         ? null
-                        : create_group, // Disable button when loading
+                        : modify_group, // Disable button when loading
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(4),
@@ -373,7 +425,7 @@ class _CreateGroupState extends State<CreateGroup> {
                     child: isLoading
                         ? const CircularProgressIndicator() // Show loading indicator
                         : const Text(
-                            'グループを作成',
+                            '変更を確定',
                             style: TextStyle(color: Colors.white),
                           ),
                   ),

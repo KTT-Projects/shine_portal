@@ -25,7 +25,7 @@ class _CreateDmState extends State<CreateDm> {
     setState(() {
       isLoading = true; // Show loading indicator
     });
-
+    String dmId_ = '';
     bool flag = false;
     _searchFieldValue = _searchFieldController.text;
     if (_searchFieldValue == '') {
@@ -50,7 +50,7 @@ class _CreateDmState extends State<CreateDm> {
     if (docSnapshot.exists) {
       final data = docSnapshot.data() as Map<String, dynamic>;
       data['dm']?.forEach((value) {
-        if (value[0] == _searchFieldValue.toLowerCase()) {
+        if (value == _searchFieldValue.toLowerCase()) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -93,7 +93,7 @@ class _CreateDmState extends State<CreateDm> {
       }
       CollectionReference dm = db.collection('dm');
       final newDocRef = await dm.add({
-        'messages': ['DMが作成されました'],
+        'messages': ['システム: DMが作成されました'],
         'time': [DateTime.now()],
         'sender': [userId],
       });
@@ -113,6 +113,7 @@ class _CreateDmState extends State<CreateDm> {
         data2['dmId'].add(newDocId);
         docRef2.update(data2);
       }
+      dmId_ = newDocId;
     }
     setState(() {
       isLoading = false; // Hide loading indicator
@@ -121,8 +122,9 @@ class _CreateDmState extends State<CreateDm> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IndivisualChatRoom(
+        builder: (context) => IndividualChatRoom(
           name: capitalize(_searchFieldValue.toLowerCase()),
+          dmId: dmId_,
         ),
       ),
     );
