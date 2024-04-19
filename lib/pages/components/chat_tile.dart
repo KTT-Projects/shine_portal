@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:shine_portal/pages/chat_room.dart';
@@ -27,10 +29,10 @@ class ChatTile extends StatefulWidget {
 }
 
 class _ChatTileState extends State<ChatTile> {
-  @override
   final now = DateTime.now();
   String formattedTime = '';
 
+  @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
     String formattedTime = '';
@@ -38,6 +40,16 @@ class _ChatTileState extends State<ChatTile> {
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = DateTime(now.year, now.month, now.day - 1);
 
+    // Truncate the latest message if it's longer than 13 characters
+    final formatted_message = widget.latest_message.length > 30
+        ? '${widget.latest_message.substring(0, 30)}…'
+        : widget.latest_message;
+
+    final formatted_chat_name = widget.name.length > 20
+        ? '${widget.name.substring(0, 20)}…'
+        : widget.name;
+
+    // Format the time based on the message's timestamp
     if (widget.latest_time.isAfter(today)) {
       formattedTime = 'Today ${DateFormat('HH:mm').format(widget.latest_time)}';
     } else if (widget.latest_time.isAfter(yesterday)) {
@@ -53,7 +65,7 @@ class _ChatTileState extends State<ChatTile> {
     return Padding(
       padding: const EdgeInsets.only(left: 8, right: 8, bottom: 5),
       child: Slidable(
-        endActionPane: ActionPane(motion: StretchMotion(), children: [
+        endActionPane: ActionPane(motion: const StretchMotion(), children: [
           SlidableAction(
             onPressed: widget.deleteChat,
             icon: Icons.delete,
@@ -101,7 +113,7 @@ class _ChatTileState extends State<ChatTile> {
                     children: [
                       CircleAvatar(
                         radius: 30,
-                        // child: Icon(Icons.person),
+                        // Display different icons based on the chat type
                         child: Icon(
                           widget.type == 'dm' ? Icons.person : Icons.group,
                           size: 30,
@@ -111,18 +123,26 @@ class _ChatTileState extends State<ChatTile> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget.name,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                          Container(
+                            width: 170,
+                            child: Text(
+                              formatted_chat_name,
+                              overflow: TextOverflow.fade,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                          Text(
-                            widget.latest_message,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
+                          Container(
+                            width: 170,
+                            child: Text(
+                              formatted_message,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
                             ),
                           ),
                         ],
@@ -131,7 +151,7 @@ class _ChatTileState extends State<ChatTile> {
                   ),
                   Text(
                     formattedTime,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
                     ),
@@ -142,21 +162,6 @@ class _ChatTileState extends State<ChatTile> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class ChatPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    // TODO: Implement the chat page UI
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Chat Page'),
-      ),
-      body: Center(
-        child: Text('Chat Page'),
       ),
     );
   }

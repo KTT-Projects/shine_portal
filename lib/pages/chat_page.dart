@@ -71,7 +71,6 @@ class _ChatPageState extends State<ChatPage> {
               if (snapshot.hasError) {
                 return const Text('エラーが発生しました');
               }
-
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(
                   child: CircularProgressIndicator(),

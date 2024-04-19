@@ -4,10 +4,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
-import 'package:shine_portal/pages/setting_chat.dart';
+import 'package:shine_portal/pages/chat_settings.dart';
 
 class GroupChatPage extends StatefulWidget {
-  final String name, groupId;
+  final String groupId;
+  String name;
   GroupChatPage({
     Key? key,
     required this.name,
@@ -66,37 +67,59 @@ class ChatRoomState extends State<GroupChatPage> {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          backgroundColor: Color(0xFFF0F5FA),
-          title: Text(
-            widget.name,
-            style: TextStyle(
-              color: Colors.black87,
-            ),
-          ),
-          iconTheme: IconThemeData(
+          backgroundColor: const Color(0xFFF0F5FA),
+          title: StreamBuilder<QuerySnapshot>(
+              stream: db.collection('group').snapshots(),
+              builder: (context, snapshot) {
+                widget.name = snapshot.data!.docs
+                    .firstWhere((doc) => doc.id == widget.groupId)['name'];
+                return Text(
+                  widget.name,
+                  style: const TextStyle(
+                    color: Colors.black87,
+                  ),
+                );
+              }),
+          iconTheme: const IconThemeData(
             color: Colors.black87,
           ),
           actions: [
-            IconButton(
-              icon: Icon(Icons.density_medium),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingChat()),
-                );
-              },
-            ),
+            StreamBuilder<QuerySnapshot>(
+                stream: db.collection('group').snapshots(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  final users = List<String>.from(snapshot.data!.docs
+                      .firstWhere((doc) => doc.id == widget.groupId)['users']);
+                  return IconButton(
+                    icon: const Icon(Icons.density_medium),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ChatSettings(
+                                  name: widget.name,
+                                  groupId: widget.groupId,
+                                  users: users,
+                                )),
+                      );
+                    },
+                  );
+                }),
           ],
         ),
         body: StreamBuilder<QuerySnapshot>(
             stream: db.collection('group').snapshots(),
             builder: (context, snapshot) {
-              _messages.clear();
               if (!snapshot.hasData) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               }
+              _messages.clear();
               final messages = List<String>.from(snapshot.data!.docs
                   .firstWhere((doc) => doc.id == widget.groupId)['messages']);
               final sender = List<String>.from(snapshot.data!.docs

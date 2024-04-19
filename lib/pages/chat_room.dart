@@ -7,8 +7,8 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class IndividualChatRoom extends StatefulWidget {
   final String name, dmId;
-  IndividualChatRoom({
-    Key? key,
+  const IndividualChatRoom({
+    super.key,
     required this.name,
     required this.dmId,
   });
