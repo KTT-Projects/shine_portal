@@ -30,15 +30,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
               );
             },
           ),
-          // InkWell(
-          //   child: Text('https://shine-portal.kttprojects.com/roadmap'),
-          //   onTap: () async {
-          //     if (await canLaunch(
-          //         'https://shine-portal.kttprojects.com/roadmap')) {
-          //       await launch('https://shine-portal.kttprojects.com/roadmap');
-          //     }
-          //   },
-          // )
         ],
       )),
     );
