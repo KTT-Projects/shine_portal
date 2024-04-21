@@ -65,7 +65,7 @@ class _CalendarPageState extends State<CalendarPage> {
   List<Map<String, Object>> _selectedEvents = [];
   final List<TimeOfDay> _selectedTime =
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
-  FocusNode _focus = FocusNode();
+  final FocusNode _focus = FocusNode();
 
   void saveNewEvent(List list) {
     for (var i in list) {
@@ -286,10 +286,8 @@ class _CalendarPageState extends State<CalendarPage> {
                           autofocus: true,
                           textInputAction: TextInputAction.next,
                           controller: _controllers[0],
-                          decoration: InputDecoration(
-                            labelText: '研修名',
-                            isDense: true,
-                          ),
+                          decoration:
+                              InputDecoration(labelText: '研修名', isDense: true),
                         ),
                       ),
                     ),
@@ -300,15 +298,13 @@ class _CalendarPageState extends State<CalendarPage> {
                         child: TextField(
                           textInputAction: TextInputAction.next,
                           controller: _controllers[1],
-                          focusNode: _focus,
-                          decoration: InputDecoration(
-                            labelText: '開始時間',
-                            isDense: true,
-                          ),
+                          // focusNode: _focus,
+                          decoration:
+                              InputDecoration(labelText: '開始時間', isDense: true),
                           onTap: () {
                             _selectTime(context, 1);
                             // _focus.addListener(_onFocusChange);
-                            FocusManager.instance.primaryFocus?.unfocus();
+                            // FocusManager.instance.primaryFocus?.unfocus();
                           },
                         ),
                       ),
@@ -321,14 +317,12 @@ class _CalendarPageState extends State<CalendarPage> {
                           textInputAction: TextInputAction.next,
                           controller: _controllers[2],
                           focusNode: _focus,
-                          decoration: InputDecoration(
-                            labelText: '終了時間',
-                            isDense: true,
-                          ),
+                          decoration:
+                              InputDecoration(labelText: '終了時間', isDense: true),
                           onTap: () {
                             _selectTime(context, 2);
                             // _focus.addListener(_onFocusChange);
-                            FocusManager.instance.primaryFocus?.unfocus();
+                            // FocusManager.instance.primaryFocus?.unfocus();
                           },
                         ),
                       ),
@@ -340,10 +334,8 @@ class _CalendarPageState extends State<CalendarPage> {
                         child: TextField(
                           textInputAction: TextInputAction.done,
                           controller: _controllers[3],
-                          decoration: InputDecoration(
-                            labelText: '内容',
-                            isDense: true,
-                          ),
+                          decoration:
+                              InputDecoration(labelText: '内容', isDense: true),
                         ),
                       ),
                     ),
