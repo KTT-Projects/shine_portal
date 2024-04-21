@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -18,50 +19,52 @@ class _CalendarPageState extends State<CalendarPage> {
   //   DateTime.utc(2024, 3, 8): ['first', 'second'],
   //   DateTime.utc(2024, 3, 9): ['third', 'forth'],
   // };
-  Map events = {
-    DateTime.utc(2024, 3, 8): [
-      {
-        'title': 'First',
-        'start': '13:00',
-        'end': '13:30',
-        'detail':
-            '昔マーフィーはこのモットーが言いました、「すべては原因、結果の法則によります。運命論者のいう運・不運は、貴方の思考や行動と無縁ではない。」短いながら、この言葉は私に様々な考えを持たせます。 この方面から考えるなら、昔ソローは不意にこう言いました、「すべての不幸は未来への踏み台にすぎない。」それによって私は啓発されました、 個人的に言うなら、消費税100%増税は私にとって非常に重要だと言わなければならないです。 昔カーリル・ギブランは不意にこう言いました、「お互いに手をつなぐ時にも間をあけよう。」こうした中、私の疑問が解けました。昔ジミー・コーナーズはこう言いました、「１試合にわたって集中力を維持するためには、適度にリラックスすることが絶対に必要だと思う。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。 私にとって、 昔河合隼雄はこのモットーが言いました、「あくる朝起きたら、また違う風が吹いているからね。」短いながら、この言葉は私に様々な考えを持たせます。 消費税100%増税と言いますと、消費税100%増税をどう書くのが要となる。 この方面から考えるなら、こうであれば。\n消費税100%増税はなんのことで発生したのか？昔ソローはこう言ったことがある、「すべての不幸は未来への踏み台にすぎない。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 消費税100%増税を発生するには、一体どうやってできるのか。一方、消費税100%増税を発生させない場合、何を通じてそれをできるのでしょうか。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 昔北畠親房は不意にこう言いました、「あめつちの初めは今日より始まる。」思い返せば。 昔尾崎士郎は不意にこう言いました、「あれもいい、これもいいという生き方はどこにもねえや。あっちがよけりゃこっちが悪いに決まっているのだから、これだと思ったときに盲滅法に進まなけりゃ嘘だよ。」こうした中、私の疑問が解けました。しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。',
-        'pdf': '本当はPDFだよ',
-      },
-      {
-        'title': 'Second',
-        'start': '9:00',
-        'end': '10:00',
-        'detail':
-            '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-        'pdf': '本当はPDFだよ',
-      },
-    ],
-    DateTime.utc(2024, 3, 9): [
-      {
-        'title': 'Third',
-        'start': '12:40',
-        'end': '14:35',
-        'detail':
-            '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-        'pdf': '本当はPDFだよ',
-      },
-      {
-        'title': 'Forth',
-        'start': '16:45',
-        'end': '18:00',
-        'detail':
-            '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-        'pdf': '本当はPDFだよ',
-      },
-    ],
-  };
+  List events = [
+    {
+      'date': DateTime.utc(2024, 3, 8),
+      'title': 'First',
+      'start': '13:00',
+      'end': '13:30',
+      'detail':
+          '昔マーフィーはこのモットーが言いました、「すべては原因、結果の法則によります。運命論者のいう運・不運は、貴方の思考や行動と無縁ではない。」短いながら、この言葉は私に様々な考えを持たせます。 この方面から考えるなら、昔ソローは不意にこう言いました、「すべての不幸は未来への踏み台にすぎない。」それによって私は啓発されました、 個人的に言うなら、消費税100%増税は私にとって非常に重要だと言わなければならないです。 昔カーリル・ギブランは不意にこう言いました、「お互いに手をつなぐ時にも間をあけよう。」こうした中、私の疑問が解けました。昔ジミー・コーナーズはこう言いました、「１試合にわたって集中力を維持するためには、適度にリラックスすることが絶対に必要だと思う。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。 私にとって、 昔河合隼雄はこのモットーが言いました、「あくる朝起きたら、また違う風が吹いているからね。」短いながら、この言葉は私に様々な考えを持たせます。 消費税100%増税と言いますと、消費税100%増税をどう書くのが要となる。 この方面から考えるなら、こうであれば。\n消費税100%増税はなんのことで発生したのか？昔ソローはこう言ったことがある、「すべての不幸は未来への踏み台にすぎない。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 消費税100%増税を発生するには、一体どうやってできるのか。一方、消費税100%増税を発生させない場合、何を通じてそれをできるのでしょうか。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 昔北畠親房は不意にこう言いました、「あめつちの初めは今日より始まる。」思い返せば。 昔尾崎士郎は不意にこう言いました、「あれもいい、これもいいという生き方はどこにもねえや。あっちがよけりゃこっちが悪いに決まっているのだから、これだと思ったときに盲滅法に進まなけりゃ嘘だよ。」こうした中、私の疑問が解けました。しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。',
+      'pdf': '本当はPDFだよ',
+    },
+    {
+      'date': DateTime.utc(2024, 3, 8),
+      'title': 'Second',
+      'start': '9:00',
+      'end': '10:00',
+      'detail':
+          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
+      'pdf': '本当はPDFだよ',
+    },
+    {
+      'date': DateTime.utc(2024, 3, 9),
+      'title': 'Third',
+      'start': '12:40',
+      'end': '14:35',
+      'detail':
+          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
+      'pdf': '本当はPDFだよ',
+    },
+    {
+      'date': DateTime.utc(2024, 3, 9),
+      'title': 'Forth',
+      'start': '16:45',
+      'end': '18:00',
+      'detail':
+          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
+      'pdf': '本当はPDFだよ',
+    }
+  ];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  List<Map<String, Object>> _selectedEvents = [];
-  final List<TimeOfDay> _selectedTime = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
-  List<TimeOfDay> picked = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
+  List<dynamic> _selectedEvents = [];
+  final List<TimeOfDay> _selectedTime =
+      List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
+  List<TimeOfDay> picked =
+      List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
 
   void saveNewEvent(String value) {
     print(value);
@@ -108,7 +111,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
-                  _selectedEvents = events[selectedDay] ?? [];
+                  _selectedEvents = events.where((event) => event['date'] == selectedDay).toList();
                 });
               },
               onFormatChanged: (format) {
@@ -161,7 +164,7 @@ class _CalendarPageState extends State<CalendarPage> {
                     TextStyle(color: Theme.of(context).colorScheme.onSecondary),
               ),
               eventLoader: (day) {
-                return events[day] ?? [];
+                return events.where((event) => event['date'] == day).toList();
               },
             ),
             // MaterialButton(

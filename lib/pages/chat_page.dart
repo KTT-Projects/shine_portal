@@ -8,6 +8,51 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  void createChatRoom() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'チャットタイプを選択してください',
+            style: TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: const Icon(Icons.person),
+                title: const Text(
+                  '個人',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                onTap: () {
+                  // Handle the tap
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.group),
+                title: const Text(
+                  'グループ',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+                onTap: () {
+                  // Handle the tap
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -15,12 +60,12 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: createChatRoom,
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(),
-                backgroundColor: Color(0xFF3E5C79),
+                shape: const RoundedRectangleBorder(),
+                backgroundColor: const Color(0xFF3E5C79),
               ),
-              child: Container(
+              child: const SizedBox(
                 width: double.infinity,
                 child: Center(
                   child: Text(
