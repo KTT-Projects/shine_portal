@@ -1,8 +1,11 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:file_picker/file_picker.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -83,6 +86,18 @@ class _CalendarPageState extends State<CalendarPage> {
       },
     ))!;
     _controllers[index].text = _selectedTime[index].format(context);
+  }
+
+  Future getPdfFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+    if (result != null) {
+      File file = File(result.files.single.path!);
+    } else {
+      // User canceled the picker
+    }
   }
 
   @override
@@ -331,6 +346,12 @@ class _CalendarPageState extends State<CalendarPage> {
                           ),
                         ),
                       ),
+                    ),
+                    MaterialButton(
+                      onPressed: () {
+                        getPdfFile();
+                      },
+                      child: const Text('PDFを追加'),
                     ),
                     MaterialButton(
                       onPressed: () {
