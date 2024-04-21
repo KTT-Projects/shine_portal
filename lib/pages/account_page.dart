@@ -11,10 +11,13 @@ class AccountPage extends StatefulWidget {
 
 class _AccountPageState extends State<AccountPage> {
   final user = FirebaseAuth.instance.currentUser!;
+
+  // Function to log out the user
   void logout() {
     FirebaseAuth.instance.signOut();
   }
 
+  // Function to capitalize the first letter of a string
   String capitalize(String s) {
     if (s.isEmpty) return s;
     return s[0].toUpperCase() + s.substring(1);
@@ -22,12 +25,11 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Logo image with shader mask
           ShaderMask(
             shaderCallback: (Rect bounds) {
               return const LinearGradient(
@@ -45,7 +47,8 @@ class _AccountPageState extends State<AccountPage> {
               width: 250,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
+          // App name text with shader mask
           ShaderMask(
             shaderCallback: (bounds) => const LinearGradient(
               colors: [
@@ -66,14 +69,16 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
           ),
-          SizedBox(height: 10),
-          Text(
+          const SizedBox(height: 10),
+          // Support email text
+          const Text(
             'サポート: info@kttprojects.com',
             style: TextStyle(
               color: Color(0x951C1D21),
             ),
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
+          // Logout button
           ElevatedButton(
             onPressed: logout,
             style: ElevatedButton.styleFrom(

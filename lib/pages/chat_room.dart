@@ -1,78 +1,136 @@
-import 'dart:convert';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_types/flutter_chat_types.dart' as types;
 import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
-String randomString() {
-  final random = Random.secure();
-  final values = List<int>.generate(16, (i) => random.nextInt(255));
-  return base64UrlEncode(values);
-}
-
-class IndivisualChatRoom extends StatefulWidget {
-  const IndivisualChatRoom({super.key});
+class IndividualChatRoom extends StatefulWidget {
+  final String name, dmId;
+  const IndividualChatRoom({
+    super.key,
+    required this.name,
+    required this.dmId,
+  });
 
   @override
-  IndivisualChatRoomState createState() => IndivisualChatRoomState();
+  IndividualChatRoomState createState() => IndividualChatRoomState();
 }
 
-class IndivisualChatRoomState extends State<IndivisualChatRoom> {
+class IndividualChatRoomState extends State<IndividualChatRoom> {
+  String userId =
+      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _messages = [];
-  final _user = const types.User(id: '82091008-a484-4a89-ae75-a22bf8d6f3ac');
+  final _user = const types.User(id: '');
 
-//他のユーザーの情報を取得
-  final _other = const types.User(
-      id: 'otheruser',
-      firstName: "テスト",
-      lastName: "太郎",
-  );
-
-  @override
-    void initState() {
-      super.initState();
-      _addMessage(types.TextMessage(
+  void _addMessage(String author, String message, String id, final time) {
+    final types.TextMessage textMessage;
+    if (author == widget.name.toLowerCase()) {
+      textMessage = types.TextMessage(
         author: _other,
-        createdAt: DateTime.now().millisecondsSinceEpoch,
-        id: randomString(),
-        text: "テストです。",
-    ));
+        createdAt: time.toDate().millisecondsSinceEpoch,
+        id: id,
+        text: message,
+      );
+    } else {
+      textMessage = types.TextMessage(
+        author: _user,
+        createdAt: time.toDate().millisecondsSinceEpoch,
+        id: id,
+        text: message,
+      );
+    }
+    _messages.insert(0, textMessage);
   }
-  @override
-  Widget build(BuildContext context) => Scaffold(
-        body: Chat(
-          // 追加
-          theme: const DefaultChatTheme(
-            backgroundColor: Color(0xFFF0F5FA),
-            primaryColor: Color(0xFF3E5C79),  // メッセージの背景色の変更
-            userAvatarNameColors: [Colors.black87],  // ユーザー名の文字色の変更
-            sentMessageDocumentIconColor: Colors.black87,
-            secondaryColor: Color(0xFFFFFFFF),
-            inputBackgroundColor: Color(0xFFFFFFFF),
-            inputTextColor: Color(0xFF1C1D21)
-          ),
-          messages: _messages,
-          onSendPressed: _handleSendPressed,
-          user: _user,
-          showUserAvatars: true,
-          showUserNames: true,
-        ),
+
+  //他のユーザーの情報を取得
+  types.User get _other => types.User(
+        id: widget.name,
+        firstName: widget.name,
       );
 
-  void _addMessage(types.Message message) {
-    setState(() {
-      _messages.insert(0, message);
-    });
+  @override
+  void initState() {
+    super.initState();
   }
+
+  final user = FirebaseAuth.instance.currentUser!;
+  final db = FirebaseFirestore.instance;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(
+          backgroundColor: const Color(0xFFF0F5FA),
+          title: Text(
+            widget.name,
+            style: const TextStyle(
+              color: Colors.black87,
+            ),
+          ),
+          iconTheme: const IconThemeData(
+            color: Colors.black87,
+          ),
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: db.collection('dm').snapshots(),
+            builder: (context, snapshot) {
+              _messages.clear();
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final messages = List<String>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.dmId)['messages']);
+              final sender = List<String>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.dmId)['sender']);
+              final time = List<Timestamp>.from(snapshot.data!.docs
+                  .firstWhere((doc) => doc.id == widget.dmId)['time']);
+              for (var i = 0;
+                  i < min(messages.length, min(sender.length, time.length));
+                  i++) {
+                _addMessage(sender[i], messages[i], i.toString(), time[i]);
+              }
+              return Chat(
+                // 追加
+                theme: const DefaultChatTheme(
+                    backgroundColor: Color(0xFFF0F5FA),
+                    primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
+                    userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
+                    sentMessageDocumentIconColor: Colors.black87,
+                    secondaryColor: Color(0xFFFFFFFF),
+                    inputBackgroundColor: Color(0xFFFFFFFF),
+                    inputTextColor: Color(0xFF1C1D21)),
+                messages: _messages,
+                onSendPressed: _handleSendPressed,
+                user: _user,
+                showUserAvatars: true,
+                showUserNames: true,
+              );
+            }),
+      );
 
   void _handleSendPressed(types.PartialText message) {
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: randomString(),
+      id: _messages.length.toString(),
       text: message.text,
     );
+    db.collection('dm').doc(widget.dmId).get().then((doc) {
+      final messages = List<String>.from(doc.data()!['messages']);
+      final sender = List<String>.from(doc.data()!['sender']);
+      final time = List<Timestamp>.from(doc.data()!['time']);
 
-    _addMessage(textMessage);
+      messages.add(textMessage.text);
+      sender.add(userId);
+      time.add(Timestamp.fromDate(DateTime.now()));
+
+      db.collection('dm').doc(widget.dmId).update({
+        'messages': messages,
+        'sender': sender,
+        'time': time,
+      });
+    });
   }
 }
