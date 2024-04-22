@@ -182,15 +182,16 @@ class _LoginPageState extends State<LoginPage> {
                               const Color(0xFF3E5C79), // Background color
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(
-                                5), // Closer to a rectangle
+                                10), // Closer to a rectangle
                           ),
                         ),
                         child: const Text(
                           'ログイン',
                           style: TextStyle(
-                              color: Color(0xFFF0F5FA),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15),
+                            color: Color(0xFFF0F5FA),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                     ),
