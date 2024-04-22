@@ -11,7 +11,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   // runApp(const MyApp());
-  initializeDateFormatting().then((_) => runApp(const MyApp()));
+  initializeDateFormatting('ja').then((_) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
