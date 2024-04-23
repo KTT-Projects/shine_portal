@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -178,7 +180,6 @@ class _ChatSettingsState extends State<ChatSettings> {
         });
         flag = true;
       }
-      print(flag);
       if (!flag) {
         messages.add('システム: グループ名/参加者が変更されました');
         sender.add(userId);
@@ -219,6 +220,65 @@ class _ChatSettingsState extends State<ChatSettings> {
     });
   }
 
+  Future leave_group() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('グループを退出しますか？'),
+          content: const Text('グループから退出すると、グループのメッセージを見ることができなくなります。'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('キャンセル'),
+            ),
+            TextButton(
+              onPressed: () async {
+                setState(() {
+                  isLoading = true; // Show loading indicator
+                });
+                List messages, sender, time, usersList;
+                final doc =
+                    await db.collection('group').doc(widget.groupId).get();
+                messages = List<String>.from(doc.data()!['messages']);
+                sender = List<String>.from(doc.data()!['sender']);
+                time = List<Timestamp>.from(doc.data()!['time']);
+                usersList = List<String>.from(doc.data()!['users']);
+                messages.add('システム: ${capitalize(userId)} がグループを退出しました');
+                sender.add(userId);
+                time.add(Timestamp.fromDate(DateTime.now()));
+                usersList.remove(userId);
+                await db.collection('group').doc(widget.groupId).update({
+                  'messages': messages,
+                  'sender': sender,
+                  'time': time,
+                  'users': usersList,
+                });
+                final userDoc =
+                    await db.collection('userData').doc(userId).get();
+                List groups = List<String>.from(userDoc.data()!['group']);
+                groups.remove(widget.groupId);
+                await db.collection('userData').doc(userId).update({
+                  'group': groups,
+                });
+                if (usersList.isEmpty) {
+                  await db.collection('group').doc(widget.groupId).delete();
+                }
+                setState(() {
+                  isLoading = false; // Hide loading indicator
+                });
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              child: const Text('退出'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   // Capitalize the first letter of a string
   String capitalize(String s) {
     if (s.isEmpty) return s;
@@ -230,7 +290,7 @@ class _ChatSettingsState extends State<ChatSettings> {
   @override
   void initState() {
     super.initState();
-    users = widget.users;
+    users = List<String>.from(widget.users);
     users.remove(userId);
     _textFieldController.text = widget.name;
     fetchSuggestions();
@@ -431,6 +491,31 @@ class _ChatSettingsState extends State<ChatSettings> {
                   ),
                 ),
               ),
+              const SizedBox(
+                height: 40,
+              ),
+              // Leave group chat button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ElevatedButton(
+                  onPressed: leave_group,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    backgroundColor: const Color(0xFFFF6B6B),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 20),
+                  ),
+                  child: const Text(
+                    'グループを退出',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: 40,
+              )
             ],
           ),
         ),
