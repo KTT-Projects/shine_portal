@@ -17,10 +17,6 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
-  // final events = {
-  //   DateTime.utc(2024, 3, 8): ['first', 'second'],
-  //   DateTime.utc(2024, 3, 9): ['third', 'forth'],
-  // };
   List events = [
     {
       'date': DateTime.utc(2024, 3, 8),
@@ -96,6 +92,7 @@ class _CalendarPageState extends State<CalendarPage> {
     );
     if (result != null) {
       File file = File(result.files.single.path!);
+      file;
     } else {
       // User canceled the picker
     }
