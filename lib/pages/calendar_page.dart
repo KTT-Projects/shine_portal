@@ -1,11 +1,15 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+
+import 'dart:async';
+import 'dart:core';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -17,57 +21,80 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
-  List events = [
-    {
-      'date': DateTime.utc(2024, 3, 8),
-      'title': 'First',
-      'start': '13:00',
-      'end': '13:30',
-      'detail':
-          '昔マーフィーはこのモットーが言いました、「すべては原因、結果の法則によります。運命論者のいう運・不運は、貴方の思考や行動と無縁ではない。」短いながら、この言葉は私に様々な考えを持たせます。 この方面から考えるなら、昔ソローは不意にこう言いました、「すべての不幸は未来への踏み台にすぎない。」それによって私は啓発されました、 個人的に言うなら、消費税100%増税は私にとって非常に重要だと言わなければならないです。 昔カーリル・ギブランは不意にこう言いました、「お互いに手をつなぐ時にも間をあけよう。」こうした中、私の疑問が解けました。昔ジミー・コーナーズはこう言いました、「１試合にわたって集中力を維持するためには、適度にリラックスすることが絶対に必要だと思う。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。 私にとって、 昔河合隼雄はこのモットーが言いました、「あくる朝起きたら、また違う風が吹いているからね。」短いながら、この言葉は私に様々な考えを持たせます。 消費税100%増税と言いますと、消費税100%増税をどう書くのが要となる。 この方面から考えるなら、こうであれば。\n消費税100%増税はなんのことで発生したのか？昔ソローはこう言ったことがある、「すべての不幸は未来への踏み台にすぎない。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 消費税100%増税を発生するには、一体どうやってできるのか。一方、消費税100%増税を発生させない場合、何を通じてそれをできるのでしょうか。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 昔北畠親房は不意にこう言いました、「あめつちの初めは今日より始まる。」思い返せば。 昔尾崎士郎は不意にこう言いました、「あれもいい、これもいいという生き方はどこにもねえや。あっちがよけりゃこっちが悪いに決まっているのだから、これだと思ったときに盲滅法に進まなけりゃ嘘だよ。」こうした中、私の疑問が解けました。しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。',
-      'pdf': '本当はPDFだよ',
-    },
-    {
-      'date': DateTime.utc(2024, 3, 8),
-      'title': 'Second',
-      'start': '9:00',
-      'end': '10:00',
-      'detail':
-          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-      'pdf': '本当はPDFだよ',
-    },
-    {
-      'date': DateTime.utc(2024, 3, 9),
-      'title': 'Third',
-      'start': '12:40',
-      'end': '14:35',
-      'detail':
-          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-      'pdf': '本当はPDFだよ',
-    },
-    {
-      'date': DateTime.utc(2024, 3, 9),
-      'title': 'Forth',
-      'start': '16:45',
-      'end': '18:00',
-      'detail':
-          '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-      'pdf': '本当はPDFだよ',
-    }
-  ];
+  // final String<TextEditingController> _title = TextEditingController();
+
+  // final events = {
+  //   DateTime.utc(2024, 3, 8): ['first', 'second'],
+  //   DateTime.utc(2024, 3, 9): ['third', 'forth'],
+  // };
+
+  // List events = [
+  //   {
+  //     'date': DateTime.utc(2024, 3, 8),
+  //     'title': 'First',
+  //     'start': '13:00',
+  //     'end': '13:30',
+  //     'detail':
+  //         '昔マーフィーはこのモットーが言いました、「すべては原因、結果の法則によります。運命論者のいう運・不運は、貴方の思考や行動と無縁ではない。」短いながら、この言葉は私に様々な考えを持たせます。 この方面から考えるなら、昔ソローは不意にこう言いました、「すべての不幸は未来への踏み台にすぎない。」それによって私は啓発されました、 個人的に言うなら、消費税100%増税は私にとって非常に重要だと言わなければならないです。 昔カーリル・ギブランは不意にこう言いました、「お互いに手をつなぐ時にも間をあけよう。」こうした中、私の疑問が解けました。昔ジミー・コーナーズはこう言いました、「１試合にわたって集中力を維持するためには、適度にリラックスすることが絶対に必要だと思う。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。 私にとって、 昔河合隼雄はこのモットーが言いました、「あくる朝起きたら、また違う風が吹いているからね。」短いながら、この言葉は私に様々な考えを持たせます。 消費税100%増税と言いますと、消費税100%増税をどう書くのが要となる。 この方面から考えるなら、こうであれば。\n消費税100%増税はなんのことで発生したのか？昔ソローはこう言ったことがある、「すべての不幸は未来への踏み台にすぎない。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 消費税100%増税を発生するには、一体どうやってできるのか。一方、消費税100%増税を発生させない場合、何を通じてそれをできるのでしょうか。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 昔北畠親房は不意にこう言いました、「あめつちの初めは今日より始まる。」思い返せば。 昔尾崎士郎は不意にこう言いました、「あれもいい、これもいいという生き方はどこにもねえや。あっちがよけりゃこっちが悪いに決まっているのだから、これだと思ったときに盲滅法に進まなけりゃ嘘だよ。」こうした中、私の疑問が解けました。しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。',
+  //     'pdf': '本当はPDFだよ',
+  //   },
+  //   {
+  //     'date': DateTime.utc(2024, 3, 8),
+  //     'title': 'Second',
+  //     'start': '9:00',
+  //     'end': '10:00',
+  //     'detail':
+  //         '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
+  //     'pdf': '本当はPDFだよ',
+  //   },
+  //   {
+  //     'date': DateTime.utc(2024, 3, 9),
+  //     'title': 'Third',
+  //     'start': '12:40',
+  //     'end': '14:35',
+  //     'detail':
+  //         '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
+  //     'pdf': '本当はPDFだよ',
+  //   },
+  // {
+  //   'date': date,
+  //   'title': data['title'],
+  //   'start': data['timeStart'],
+  //   'end': data['timeFinish'],
+  //   'detail':data['detail'],
+  //   'pdf': '本当はPDFだよ',
+  // }
+  // ];
+
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
+  DateTime? _selectedDay = DateTime.now();
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  List<dynamic> _selectedEvents = [];
   final List<TimeOfDay> _selectedTime =
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   final FocusNode _focus = FocusNode();
   final storage = FirebaseStorage.instance;
 
-  void saveNewEvent(List list) {
-    for (var i in list) {
-      print(list[i].text);
-    }
+  // void saveNewEvent(List val) {
+  //   FirebaseFirestore.instance
+  //       .collection('training')
+  //       .doc('schedule')
+  //       .set({'date': 'data', 'title': 'title'});
+  //   print(val);
+  // }
+
+  void saveNewEvent(List val) {
+    FirebaseFirestore.instance.collection('training').doc().set({
+      'date': _focusedDay,
+      'title': _controllers[0].text,
+      'timeStart': _controllers[1].text,
+      'timeFinish': _controllers[2].text,
+      'detail': _controllers[3].text,
+    });
+    // print(_controllers[0].text);
+    // print(_controllers[1].text);
+    // print(_controllers[2].text);
+    // print(_controllers[3].text);
+    // print(_focusedDay);
   }
 
   Future<void> _selectTime(BuildContext context, int index) async {
@@ -83,6 +110,15 @@ class _CalendarPageState extends State<CalendarPage> {
       },
     ))!;
     _controllers[index].text = _selectedTime[index].format(context);
+
+    if (_selectedTime[index] != null) {
+      String hour = _selectedTime[index].hour.toString().padLeft(2, "0");
+      String min = _selectedTime[index].minute.toString().padLeft(2, "0");
+      setState(() {
+        _selectedTime[index] = _selectedTime[index];
+        _controllers[index].text = '$hour:$min';
+      });
+    }
   }
 
   Future getPdfFile() async {
@@ -101,6 +137,7 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   void initState() {
     super.initState();
+    // getInfo();
     // _focus.addListener(_onFocusChange);
   }
 
@@ -112,149 +149,204 @@ class _CalendarPageState extends State<CalendarPage> {
     }
   }
 
-  @override
+  final db = FirebaseFirestore.instance;
+
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TableCalendar(
-              locale: 'ja_JP',
-              firstDay: DateTime.utc(2024, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              calendarFormat: _calendarFormat,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                  _selectedEvents = events.where((event) => event['date'] == selectedDay).toList();
+        child: StreamBuilder<QuerySnapshot>(
+            stream: db.collection('training').snapshots(),
+            builder: (context, snapshot) {
+              List events = [], _selectedEvents = [];
+              events.clear();
+              if (!snapshot.hasData) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final documents = snapshot.data!.docs;
+              for (var index = 0; index < documents.length; index++) {
+                events.add({
+                  'date':
+                      documents[index]['date'].toDate().millisecondsSinceEpoch,
+                  'title': documents[index]['title'],
+                  'start': documents[index]['timeStart'],
+                  'end': documents[index]['timeFinish'],
+                  'detail': documents[index]['detail'],
                 });
-              },
-              onFormatChanged: (format) {
-                if (format == CalendarFormat.week) {
-                  format = CalendarFormat.month;
-                }
-                setState(() => _calendarFormat = format);
-              },
-              onPageChanged: (focusedDay) {
-                setState(() {
-                  _selectedDay = null;
-                  _focusedDay = focusedDay;
-                  _selectedEvents = [];
-                });
-              },
-              headerStyle: HeaderStyle(
-                titleCentered: true,
-                leftChevronPadding: const EdgeInsets.all(0),
-                rightChevronPadding: const EdgeInsets.all(0),
-                leftChevronIcon: Icon(
-                  Icons.keyboard_double_arrow_left,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                rightChevronIcon: Icon(
-                  Icons.keyboard_double_arrow_right,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-                formatButtonShowsNext: false,
-                formatButtonDecoration: BoxDecoration(
-                  border:
-                      Border.all(color: Theme.of(context).colorScheme.primary),
-                  borderRadius: const BorderRadius.all(Radius.circular(20.0)),
-                ),
-              ),
-              daysOfWeekHeight: 30,
-              calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color:
-                      Theme.of(context).colorScheme.secondary.withOpacity(.5),
-                  // color: Color(0xFF3E5C79),
-                  shape: BoxShape.circle,
-                ),
-                todayTextStyle:
-                    TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-                selectedDecoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.secondary,
-                  shape: BoxShape.circle,
-                ),
-                selectedTextStyle:
-                    TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-              ),
-              eventLoader: (day) {
-                return events.where((event) => event['date'] == day).toList();
-              },
-            ),
-            // MaterialButton(
-            //   color: Theme.of(context).colorScheme.secondary,
-            //   textColor: Theme.of(context).colorScheme.onSecondary,
-            //   onPressed: () {
-            //     setState(() {
-            //       _focusedDay = DateTime.now();
-            //     });
-            //   },
-            //   child: const Text('今月に戻る'),
-            // ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _selectedEvents.length,
-                itemBuilder: (context, index) {
-                  final event = _selectedEvents[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text('${event['title']}'),
-                      subtitle: Text('${event['start']}~${event['end']}'),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15.0),
-                              ),
-                              title: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('${event['title']}'),
-                                  Text(
-                                    '${event['start']}~${event['end']}',
-                                    style: const TextStyle(fontSize: 16.0),
-                                  ),
-                                ],
-                              ),
-                              // content: Column(
-                              //   mainAxisSize: MainAxisSize.min,
-                              //   children: [
-                              //     Text('${event['detail']}'),
-                              //     // PDFView(),
-                              //   ],
-                              // ),
-                              content: Scrollbar(
-                                child: SingleChildScrollView(
-                                  child: Text('${event['detail']}'),
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text('閉じる'),
-                                ),
-                              ],
-                            );
-                          },
+              }
+              if (_selectedDay != null) {
+                _selectedEvents = events
+                    .where((event) =>
+                        event['date'] == _selectedDay!.millisecondsSinceEpoch)
+                    .toList();
+              }
+              // _selectedEvents = events
+              //       .where((event) =>
+              //           event['date'] == DateTime.now().millisecondsSinceEpoch)
+              //       .toList();
+              
+              return Column(
+                children: [
+                  TableCalendar(
+                    locale: 'ja_JP',
+                    firstDay: DateTime.utc(2024, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    focusedDay: _focusedDay,
+                    calendarFormat: _calendarFormat,
+                    selectedDayPredicate: (day) {
+                      return isSameDay(_selectedDay, day);
+                    },
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                      // setState(() {
+                      //   _selectedDay = selectedDay;
+                      //   _focusedDay = focusedDay;
+                      // _selectedEvents = events
+                      //     .where((event) =>
+                      //         event['date'] ==
+                      //         selectedDay.millisecondsSinceEpoch)
+                      //     .toList();
+                      // });
+                    },
+                    onFormatChanged: (format) {
+                      if (format == CalendarFormat.week) {
+                        format = CalendarFormat.month;
+                      }
+                      setState(() => _calendarFormat = format);
+                    },
+                    onPageChanged: (focusedDay) {
+                      setState(() {
+                        _selectedDay = null;
+                        _focusedDay = focusedDay;
+                        _selectedEvents = [];
+                      });
+                      // setState(() {
+                      //   _selectedDay = null;
+                      //   _focusedDay = focusedDay;
+                      // _selectedEvents = [];
+                      // });
+                    },
+                    headerStyle: HeaderStyle(
+                      titleCentered: true,
+                      leftChevronPadding: const EdgeInsets.all(0),
+                      rightChevronPadding: const EdgeInsets.all(0),
+                      leftChevronIcon: Icon(
+                        Icons.keyboard_double_arrow_left,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      rightChevronIcon: Icon(
+                        Icons.keyboard_double_arrow_right,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      formatButtonShowsNext: false,
+                      formatButtonDecoration: BoxDecoration(
+                        border: Border.all(
+                            color: Theme.of(context).colorScheme.primary),
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(20.0)),
+                      ),
+                    ),
+                    daysOfWeekHeight: 30,
+                    calendarStyle: CalendarStyle(
+                      todayDecoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .secondary
+                            .withOpacity(.5),
+                        // color: Color(0xFF3E5C79),
+                        shape: BoxShape.circle,
+                      ),
+                      todayTextStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSecondary),
+                      selectedDecoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.secondary,
+                        shape: BoxShape.circle,
+                      ),
+                      selectedTextStyle: TextStyle(
+                          color: Theme.of(context).colorScheme.onSecondary),
+                    ),
+                    eventLoader: (day) {
+                      return events
+                          .where((event) =>
+                              event['date'] == day.millisecondsSinceEpoch)
+                          .toList();
+                    },
+                  ),
+                  // MaterialButton(
+                  //   color: Theme.of(context).colorScheme.secondary,
+                  //   textColor: Theme.of(context).colorScheme.onSecondary,
+                  //   onPressed: () {
+                  //     setState(() {
+                  //       _focusedDay = DateTime.now();
+                  //     });
+                  //   },
+                  //   child: const Text('今月に戻る'),
+                  // ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _selectedEvents.length,
+                      itemBuilder: (context, index) {
+                        final event = _selectedEvents[index];
+                        return Card(
+                          child: ListTile(
+                            title: Text('${event['title']}'),
+                            subtitle: Text('${event['start']}~${event['end']}'),
+                            onTap: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AlertDialog(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15.0),
+                                    ),
+                                    title: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text('${event['title']}'),
+                                        Text(
+                                          '${event['start']}~${event['end']}',
+                                          style:
+                                              const TextStyle(fontSize: 16.0),
+                                        ),
+                                      ],
+                                    ),
+                                    // content: Column(
+                                    //   mainAxisSize: MainAxisSize.min,
+                                    //   children: [
+                                    //     Text('${event['detail']}'),
+                                    //     // PDFView(),
+                                    //   ],
+                                    // ),
+                                    content: Scrollbar(
+                                      child: SingleChildScrollView(
+                                        child: Text('${event['detail']}'),
+                                      ),
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('閉じる'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                          ),
                         );
                       },
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
+                  ),
+                ],
+              );
+            }),
       ),
       floatingActionButton: FloatingActionButton(
         shape:
@@ -364,3 +456,56 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
+
+
+
+// Map<String, int> data = {};
+// var formattedDate;
+// var utcDate;
+// var year_date;
+// var month_date;
+// var day_date;
+// var date;
+
+// var int_year;
+// var int_month;
+// var int_day;
+
+// Future<void> getSchedule() async {
+//   final collectionRef = FirebaseFirestore.instance.collection('training'); // CollectionReference
+//   final querySnapshot = await collectionRef.get(); // QuerySnapshot
+//   final queryDocSnapshot = querySnapshot.docs; // List<QueryDocumentSnapshot>
+
+//   for (final snapshot in queryDocSnapshot) {
+//     final data = await snapshot.data(); // `data()` で中身を非同期に取得
+//     // データ処理を行う
+
+//     final date = (data['date'] as Timestamp).toDate().millisecondsSinceEpoch;
+
+//     // final dateField = data['date'];
+
+//     // if (dateField is Timestamp) {
+//     //   final dateTime = dateField.toDate();
+//     //   year_date = dateTime.year.toInt();
+//     //   month_date = dateTime.month.toInt();
+//     //   day_date = dateTime.day.toInt();
+//     //   formattedDate = "$year_date, $month_date, $day_date";
+//     //   print("フォーマット済み日付: $formattedDate");
+//     // } else {
+//     //   print("Invalid date format: $dateField");
+//     // }
+//     // final dateComponents = formattedDate.split(', ');
+//     // int_year = int.parse(dateComponents[0]);
+//     // int_month = int.parse(dateComponents[1]);
+//     // int_day = int.parse(dateComponents[2]);
+//     // print(int_year);
+//     // print(int_month);
+//     // print(int_day);
+//   }
+// }
+
+// void getInfo() async {
+//   await getSchedule();
+// }
+
+
