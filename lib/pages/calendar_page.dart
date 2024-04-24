@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -18,66 +20,17 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   final List<TextEditingController> _controllers =
       List.generate(4, (index) => TextEditingController());
-  // final String<TextEditingController> _title = TextEditingController();
-
-  // final events = {
-  //   DateTime.utc(2024, 3, 8): ['first', 'second'],
-  //   DateTime.utc(2024, 3, 9): ['third', 'forth'],
-  // };
-
-  // List events = [
-  //   {
-  //     'date': DateTime.utc(2024, 3, 8),
-  //     'title': 'First',
-  //     'start': '13:00',
-  //     'end': '13:30',
-  //     'detail':
-  //         '昔マーフィーはこのモットーが言いました、「すべては原因、結果の法則によります。運命論者のいう運・不運は、貴方の思考や行動と無縁ではない。」短いながら、この言葉は私に様々な考えを持たせます。 この方面から考えるなら、昔ソローは不意にこう言いました、「すべての不幸は未来への踏み台にすぎない。」それによって私は啓発されました、 個人的に言うなら、消費税100%増税は私にとって非常に重要だと言わなければならないです。 昔カーリル・ギブランは不意にこう言いました、「お互いに手をつなぐ時にも間をあけよう。」こうした中、私の疑問が解けました。昔ジミー・コーナーズはこう言いました、「１試合にわたって集中力を維持するためには、適度にリラックスすることが絶対に必要だと思う。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。 私にとって、 昔河合隼雄はこのモットーが言いました、「あくる朝起きたら、また違う風が吹いているからね。」短いながら、この言葉は私に様々な考えを持たせます。 消費税100%増税と言いますと、消費税100%増税をどう書くのが要となる。 この方面から考えるなら、こうであれば。\n消費税100%増税はなんのことで発生したのか？昔ソローはこう言ったことがある、「すべての不幸は未来への踏み台にすぎない。」諸君にもこの言葉の意味をちゃんと味わわせようと思います。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 消費税100%増税を発生するには、一体どうやってできるのか。一方、消費税100%増税を発生させない場合、何を通じてそれをできるのでしょうか。 消費税100%増税は一体どんな存在なのかをきっちりわかるのが全ての問題の解くキーとなります。 昔北畠親房は不意にこう言いました、「あめつちの初めは今日より始まる。」思い返せば。 昔尾崎士郎は不意にこう言いました、「あれもいい、これもいいという生き方はどこにもねえや。あっちがよけりゃこっちが悪いに決まっているのだから、これだと思ったときに盲滅法に進まなけりゃ嘘だよ。」こうした中、私の疑問が解けました。しかしながら、こんなことでも、消費税100%増税の現れにはある意味意義を持っていると考えられる。',
-  //     'pdf': '本当はPDFだよ',
-  //   },
-  //   {
-  //     'date': DateTime.utc(2024, 3, 8),
-  //     'title': 'Second',
-  //     'start': '9:00',
-  //     'end': '10:00',
-  //     'detail':
-  //         '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-  //     'pdf': '本当はPDFだよ',
-  //   },
-  //   {
-  //     'date': DateTime.utc(2024, 3, 9),
-  //     'title': 'Third',
-  //     'start': '12:40',
-  //     'end': '14:35',
-  //     'detail':
-  //         '例：私本人もじっくり考えながら、夜となく昼となく予定１のことを考えています。 しかし、こうした件は全部が重要ではない。もっと重要なのは。',
-  //     'pdf': '本当はPDFだよ',
-  //   },
-  // {
-  //   'date': date,
-  //   'title': data['title'],
-  //   'start': data['timeStart'],
-  //   'end': data['timeFinish'],
-  //   'detail':data['detail'],
-  //   'pdf': '本当はPDFだよ',
-  // }
-  // ];
 
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay = DateTime.now();
+  final int year = DateTime.now().year;
+  final int month = DateTime.now().month;
+  final int day = DateTime.now().day;
+  DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final List<TimeOfDay> _selectedTime =
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   List<TimeOfDay> picked =
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
-
-  // void saveNewEvent(List val) {
-  //   FirebaseFirestore.instance
-  //       .collection('training')
-  //       .doc('schedule')
-  //       .set({'date': 'data', 'title': 'title'});
-  //   print(val);
-  // }
 
   void saveNewEvent(List val) {
     FirebaseFirestore.instance.collection('training').doc().set({
@@ -87,11 +40,6 @@ class _CalendarPageState extends State<CalendarPage> {
       'timeFinish': _controllers[2].text,
       'detail': _controllers[3].text,
     });
-    // print(_controllers[0].text);
-    // print(_controllers[1].text);
-    // print(_controllers[2].text);
-    // print(_controllers[3].text);
-    // print(_focusedDay);
   }
 
   Future<void> _selectTime(BuildContext context, int index) async {
@@ -106,21 +54,18 @@ class _CalendarPageState extends State<CalendarPage> {
         );
       },
     ))!;
-    if (picked != null) {
-      String hour = picked[index].hour.toString().padLeft(2, "0");
-      String min = picked[index].minute.toString().padLeft(2, "0");
-      setState(() {
-        _selectedTime[index] = picked[index];
-        _controllers[index].text = '$hour:$min';
-      });
-    }
-    print(picked);
+    String hour = picked[index].hour.toString().padLeft(2, "0");
+    String min = picked[index].minute.toString().padLeft(2, "0");
+    setState(() {
+      _selectedTime[index] = picked[index];
+      _controllers[index].text = '$hour:$min';
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    // getInfo();
+    _selectedDay = DateTime.utc(year, month, day);
   }
 
   final db = FirebaseFirestore.instance;
@@ -157,10 +102,10 @@ class _CalendarPageState extends State<CalendarPage> {
                     .toList();
               }
               // _selectedEvents = events
-              //       .where((event) =>
-              //           event['date'] == DateTime.now().millisecondsSinceEpoch)
-              //       .toList();
-              
+              //     .where((event) =>
+              //         event['date'] == DateTime.now().millisecondsSinceEpoch)
+              //     .toList();
+
               return Column(
                 children: [
                   TableCalendar(
@@ -425,56 +370,3 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
-
-
-
-// Map<String, int> data = {};
-// var formattedDate;
-// var utcDate;
-// var year_date;
-// var month_date;
-// var day_date;
-// var date;
-
-// var int_year;
-// var int_month;
-// var int_day;
-
-// Future<void> getSchedule() async {
-//   final collectionRef = FirebaseFirestore.instance.collection('training'); // CollectionReference
-//   final querySnapshot = await collectionRef.get(); // QuerySnapshot
-//   final queryDocSnapshot = querySnapshot.docs; // List<QueryDocumentSnapshot>
-
-//   for (final snapshot in queryDocSnapshot) {
-//     final data = await snapshot.data(); // `data()` で中身を非同期に取得
-//     // データ処理を行う
-
-//     final date = (data['date'] as Timestamp).toDate().millisecondsSinceEpoch;
-
-//     // final dateField = data['date'];
-
-//     // if (dateField is Timestamp) {
-//     //   final dateTime = dateField.toDate();
-//     //   year_date = dateTime.year.toInt();
-//     //   month_date = dateTime.month.toInt();
-//     //   day_date = dateTime.day.toInt();
-//     //   formattedDate = "$year_date, $month_date, $day_date";
-//     //   print("フォーマット済み日付: $formattedDate");
-//     // } else {
-//     //   print("Invalid date format: $dateField");
-//     // }
-//     // final dateComponents = formattedDate.split(', ');
-//     // int_year = int.parse(dateComponents[0]);
-//     // int_month = int.parse(dateComponents[1]);
-//     // int_day = int.parse(dateComponents[2]);
-//     // print(int_year);
-//     // print(int_month);
-//     // print(int_day);
-//   }
-// }
-
-// void getInfo() async {
-//   await getSchedule();
-// }
-
-
