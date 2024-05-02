@@ -2,6 +2,8 @@
 
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -23,7 +25,10 @@ class _CalendarPageState extends State<CalendarPage> {
       List.generate(4, (index) => TextEditingController());
 
   DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay = DateTime.now();
+  final int year = DateTime.now().year;
+  final int month = DateTime.now().month;
+  final int day = DateTime.now().day;
+  DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
   final List<TimeOfDay> _selectedTime =
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
@@ -80,6 +85,7 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     // getInfo();
     // _focus.addListener(_onFocusChange);
+    _selectedDay = DateTime.utc(year, month, day);
   }
 
   void _onFocusChange() {
@@ -381,56 +387,3 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 }
-
-
-
-// Map<String, int> data = {};
-// var formattedDate;
-// var utcDate;
-// var year_date;
-// var month_date;
-// var day_date;
-// var date;
-
-// var int_year;
-// var int_month;
-// var int_day;
-
-// Future<void> getSchedule() async {
-//   final collectionRef = FirebaseFirestore.instance.collection('training'); // CollectionReference
-//   final querySnapshot = await collectionRef.get(); // QuerySnapshot
-//   final queryDocSnapshot = querySnapshot.docs; // List<QueryDocumentSnapshot>
-
-//   for (final snapshot in queryDocSnapshot) {
-//     final data = await snapshot.data(); // `data()` で中身を非同期に取得
-//     // データ処理を行う
-
-//     final date = (data['date'] as Timestamp).toDate().millisecondsSinceEpoch;
-
-//     // final dateField = data['date'];
-
-//     // if (dateField is Timestamp) {
-//     //   final dateTime = dateField.toDate();
-//     //   year_date = dateTime.year.toInt();
-//     //   month_date = dateTime.month.toInt();
-//     //   day_date = dateTime.day.toInt();
-//     //   formattedDate = "$year_date, $month_date, $day_date";
-//     //   print("フォーマット済み日付: $formattedDate");
-//     // } else {
-//     //   print("Invalid date format: $dateField");
-//     // }
-//     // final dateComponents = formattedDate.split(', ');
-//     // int_year = int.parse(dateComponents[0]);
-//     // int_month = int.parse(dateComponents[1]);
-//     // int_day = int.parse(dateComponents[2]);
-//     // print(int_year);
-//     // print(int_month);
-//     // print(int_day);
-//   }
-// }
-
-// void getInfo() async {
-//   await getSchedule();
-// }
-
-
