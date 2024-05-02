@@ -73,14 +73,7 @@ class _CalendarPageState extends State<CalendarPage> {
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   final FocusNode _focus = FocusNode();
   final storage = FirebaseStorage.instance;
-
-  // void saveNewEvent(List val) {
-  //   FirebaseFirestore.instance
-  //       .collection('training')
-  //       .doc('schedule')
-  //       .set({'date': 'data', 'title': 'title'});
-  //   print(val);
-  // }
+  File? _file;
 
   void saveNewEvent(List val) {
     FirebaseFirestore.instance.collection('training').doc().set({
@@ -89,12 +82,8 @@ class _CalendarPageState extends State<CalendarPage> {
       'timeStart': _controllers[1].text,
       'timeFinish': _controllers[2].text,
       'detail': _controllers[3].text,
+      'pdf': '',
     });
-    // print(_controllers[0].text);
-    // print(_controllers[1].text);
-    // print(_controllers[2].text);
-    // print(_controllers[3].text);
-    // print(_focusedDay);
   }
 
   Future<void> _selectTime(BuildContext context, int index) async {
@@ -110,15 +99,12 @@ class _CalendarPageState extends State<CalendarPage> {
       },
     ))!;
     _controllers[index].text = _selectedTime[index].format(context);
-
-    if (_selectedTime[index] != null) {
-      String hour = _selectedTime[index].hour.toString().padLeft(2, "0");
-      String min = _selectedTime[index].minute.toString().padLeft(2, "0");
-      setState(() {
-        _selectedTime[index] = _selectedTime[index];
-        _controllers[index].text = '$hour:$min';
-      });
-    }
+    String hour = _selectedTime[index].hour.toString().padLeft(2, "0");
+    String min = _selectedTime[index].minute.toString().padLeft(2, "0");
+    setState(() {
+      _selectedTime[index] = _selectedTime[index];
+      _controllers[index].text = '$hour:$min';
+    });
   }
 
   Future getPdfFile() async {
@@ -127,8 +113,7 @@ class _CalendarPageState extends State<CalendarPage> {
       allowedExtensions: ['pdf'],
     );
     if (result != null) {
-      File file = File(result.files.single.path!);
-      file;
+      _file = File(result.files.single.path!);
     } else {
       // User canceled the picker
     }
@@ -174,6 +159,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   'start': documents[index]['timeStart'],
                   'end': documents[index]['timeFinish'],
                   'detail': documents[index]['detail'],
+                  'pdf': documents[index]['pdf'],
                 });
               }
               if (_selectedDay != null) {
@@ -182,11 +168,6 @@ class _CalendarPageState extends State<CalendarPage> {
                         event['date'] == _selectedDay!.millisecondsSinceEpoch)
                     .toList();
               }
-              // _selectedEvents = events
-              //       .where((event) =>
-              //           event['date'] == DateTime.now().millisecondsSinceEpoch)
-              //       .toList();
-              
               return Column(
                 children: [
                   TableCalendar(
@@ -437,8 +418,9 @@ class _CalendarPageState extends State<CalendarPage> {
                     ),
                     MaterialButton(
                       onPressed: () {
-                        saveNewEvent(_controllers);
+                        // saveNewEvent(_controllers);
                         Navigator.of(context).pop();
+                        print(_file);
                       },
                       child: const Text('追加'),
                     ),
