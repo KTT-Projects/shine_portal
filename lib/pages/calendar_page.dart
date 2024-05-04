@@ -38,7 +38,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   void saveNewEvent(List val) {
     FirebaseFirestore.instance.collection('training').doc().set({
-      'date': _focusedDay,
+      'date': _selectedDay,
       'title': _controllers[0].text,
       'timeStart': _controllers[1].text,
       'timeFinish': _controllers[2].text,
