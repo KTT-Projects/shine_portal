@@ -24,7 +24,7 @@ class _AccountPageState extends State<AccountPage> {
 
   @override
   Widget build(BuildContext context) {
-    String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
+    // String userId = capitalize(user.email!.replaceAll('@shine.com', ''));
 
     return Center(
       child: Column(
