@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
@@ -31,17 +32,20 @@ class _CalendarPageState extends State<CalendarPage> {
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   final FocusNode _focus = FocusNode();
   final storage = FirebaseStorage.instance;
-  File? _file;
+  Uint8List? _file;
 
   void saveNewEvent(List val) {
-    FirebaseFirestore.instance.collection('training').doc().set({
-      'date': _selectedDay,
-      'title': _controllers[0].text,
-      'timeStart': _controllers[1].text,
-      'timeFinish': _controllers[2].text,
-      'detail': _controllers[3].text,
-      'pdf': '',
-    });
+    // FirebaseFirestore.instance.collection('training').doc().set({
+    //   'date': _selectedDay,
+    //   'title': _controllers[0].text,
+    //   'timeStart': _controllers[1].text,
+    //   'timeFinish': _controllers[2].text,
+    //   'detail': _controllers[3].text,
+    //   'pdf': '',
+    // });
+    final ref = FirebaseStorage.instance.ref();
+    final fileRef = ref.child('training/${_controllers[0].text}.pdf');
+    // final uploadTask = fileRef.putData(_file!);
   }
 
   Future<void> _selectTime(BuildContext context, int index) async {
@@ -69,9 +73,16 @@ class _CalendarPageState extends State<CalendarPage> {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
+      withData: true,
     );
     if (result != null) {
-      _file = File(result.files.single.path!);
+      _file = result.files.single.bytes;
+      // Uint8List? bytes = result.files.single.bytes;
+      // _file = File(result.files.single.path! as String);
+      // print(result);
+      if (_file != null) {
+        await FirebaseStorage.instance.ref().child('training/${result.files.single.name}').putData(_file!);
+      }
     } else {
       // User canceled the picker
     }
@@ -156,7 +167,6 @@ class _CalendarPageState extends State<CalendarPage> {
                         _focusedDay = focusedDay;
                         _selectedEvents = [];
                       });
-                      print(events);
                     },
                     headerStyle: HeaderStyle(
                       titleCentered: true,
@@ -366,7 +376,6 @@ class _CalendarPageState extends State<CalendarPage> {
                       onPressed: () {
                         saveNewEvent(_controllers);
                         Navigator.of(context).pop();
-                        print(_file);
                       },
                       child: const Text('追加'),
                     ),
