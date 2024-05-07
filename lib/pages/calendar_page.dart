@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -32,20 +31,33 @@ class _CalendarPageState extends State<CalendarPage> {
       List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   final FocusNode _focus = FocusNode();
   final storage = FirebaseStorage.instance;
-  Uint8List? _file;
+  Uint8List? _pdf;
+  String? _pdfName;
 
-  void saveNewEvent(List val) {
-    // FirebaseFirestore.instance.collection('training').doc().set({
-    //   'date': _selectedDay,
-    //   'title': _controllers[0].text,
-    //   'timeStart': _controllers[1].text,
-    //   'timeFinish': _controllers[2].text,
-    //   'detail': _controllers[3].text,
-    //   'pdf': '',
-    // });
-    final ref = FirebaseStorage.instance.ref();
-    final fileRef = ref.child('training/${_controllers[0].text}.pdf');
-    // final uploadTask = fileRef.putData(_file!);
+  bool checkInput() {
+    for (var index = 0; index < _controllers.length; index++) {
+      if (_controllers[index].text.isEmpty) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  void saveNewEvent(String name) {
+    FirebaseFirestore.instance.collection('training').doc().set({
+      'date': _selectedDay,
+      'title': _controllers[0].text,
+      'timeStart': _controllers[1].text,
+      'timeFinish': _controllers[2].text,
+      'detail': _controllers[3].text,
+      'pdf': '',
+    });
+    // final ref = FirebaseStorage.instance.ref();
+    // final fileRef = ref.child('training/${_controllers[0].text}.pdf');
+    // final uploadTask = fileRef.putData(_pdf!);
+    if (_pdf != null) {
+      FirebaseStorage.instance.ref().child('training/$name').putData(_pdf!);
+    }
   }
 
   Future<void> _selectTime(BuildContext context, int index) async {
@@ -76,15 +88,14 @@ class _CalendarPageState extends State<CalendarPage> {
       withData: true,
     );
     if (result != null) {
-      _file = result.files.single.bytes;
-      // Uint8List? bytes = result.files.single.bytes;
-      // _file = File(result.files.single.path! as String);
-      // print(result);
-      if (_file != null) {
-        await FirebaseStorage.instance.ref().child('training/${result.files.single.name}').putData(_file!);
-      }
+      _pdf = result.files.single.bytes;
+      setState(() {
+        _pdfName = result.files.single.name;
+      });
     } else {
-      // User canceled the picker
+      setState(() {
+        _pdfName = null;
+      });
     }
   }
 
@@ -289,101 +300,108 @@ class _CalendarPageState extends State<CalendarPage> {
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        onPressed: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                backgroundColor: Theme.of(context).colorScheme.background,
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '新規研修予定の追加',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Theme.of(context).colorScheme.onBackground,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: SizedBox(
-                        height: 50,
-                        child: TextField(
-                          autofocus: true,
-                          textInputAction: TextInputAction.next,
-                          controller: _controllers[0],
-                          decoration:
-                              InputDecoration(labelText: '研修名', isDense: true),
+        onPressed: () async {
+          await showDialog(
+              context: context,
+              builder: (context) => StatefulBuilder(
+                  builder: (context, setState) => AlertDialog(
+                        backgroundColor:
+                            Theme.of(context).colorScheme.background,
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '新規研修予定の追加',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                color:
+                                    Theme.of(context).colorScheme.onBackground,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                height: 50,
+                                child: TextField(
+                                  autofocus: true,
+                                  textInputAction: TextInputAction.next,
+                                  controller: _controllers[0],
+                                  decoration: InputDecoration(
+                                      labelText: '研修名', isDense: true),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                height: 50,
+                                child: TextField(
+                                  textInputAction: TextInputAction.next,
+                                  controller: _controllers[1],
+                                  // focusNode: _focus,
+                                  decoration: InputDecoration(
+                                      labelText: '開始時間', isDense: true),
+                                  onTap: () {
+                                    _selectTime(context, 1);
+                                    // _focus.addListener(_onFocusChange);
+                                    // FocusManager.instance.primaryFocus?.unfocus();
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                height: 50,
+                                child: TextField(
+                                  textInputAction: TextInputAction.next,
+                                  controller: _controllers[2],
+                                  focusNode: _focus,
+                                  decoration: InputDecoration(
+                                      labelText: '終了時間', isDense: true),
+                                  onTap: () {
+                                    _selectTime(context, 2);
+                                    // _focus.addListener(_onFocusChange);
+                                    // FocusManager.instance.primaryFocus?.unfocus();
+                                  },
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: SizedBox(
+                                height: 50,
+                                child: TextField(
+                                  textInputAction: TextInputAction.done,
+                                  controller: _controllers[3],
+                                  decoration: InputDecoration(
+                                      labelText: '内容', isDense: true),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: MaterialButton(
+                                onPressed: () async {
+                                  await getPdfFile();
+                                  setState(() {});
+                                },
+                                child: Text(_pdfName ?? 'PDFファイルを選択'),
+                              ),
+                            ),
+                            MaterialButton(
+                              onPressed: () {
+                                if (checkInput()) {
+                                  saveNewEvent(_pdfName!);
+                                  Navigator.of(context).pop();
+                                } else {}
+                              },
+                              child: const Text('追加'),
+                            ),
+                          ],
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: SizedBox(
-                        height: 50,
-                        child: TextField(
-                          textInputAction: TextInputAction.next,
-                          controller: _controllers[1],
-                          // focusNode: _focus,
-                          decoration:
-                              InputDecoration(labelText: '開始時間', isDense: true),
-                          onTap: () {
-                            _selectTime(context, 1);
-                            // _focus.addListener(_onFocusChange);
-                            // FocusManager.instance.primaryFocus?.unfocus();
-                          },
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: SizedBox(
-                        height: 50,
-                        child: TextField(
-                          textInputAction: TextInputAction.next,
-                          controller: _controllers[2],
-                          focusNode: _focus,
-                          decoration:
-                              InputDecoration(labelText: '終了時間', isDense: true),
-                          onTap: () {
-                            _selectTime(context, 2);
-                            // _focus.addListener(_onFocusChange);
-                            // FocusManager.instance.primaryFocus?.unfocus();
-                          },
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 10),
-                      child: SizedBox(
-                        height: 50,
-                        child: TextField(
-                          textInputAction: TextInputAction.done,
-                          controller: _controllers[3],
-                          decoration:
-                              InputDecoration(labelText: '内容', isDense: true),
-                        ),
-                      ),
-                    ),
-                    MaterialButton(
-                      onPressed: () {
-                        getPdfFile();
-                      },
-                      child: const Text('PDFを追加'),
-                    ),
-                    MaterialButton(
-                      onPressed: () {
-                        saveNewEvent(_controllers);
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text('追加'),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
+                      )));
+          setState(() {});
         },
         child: Icon(
           Icons.add,
