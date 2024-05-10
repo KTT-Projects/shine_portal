@@ -132,7 +132,8 @@ class ChatRoomState extends State<GroupChatPage> {
               for (var i = 0;
                   i < min(messages.length, min(sender.length, time.length));
                   i++) {
-                _addMessage(sender[i], messages[i], i.toString(), time[i]);
+                _addMessage(
+                    sender[i], messages[i], (i + 1).toString(), time[i]);
               }
               return StreamBuilder<QuerySnapshot>(
                   stream: db.collection('userData').snapshots(),
