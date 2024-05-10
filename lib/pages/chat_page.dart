@@ -105,7 +105,6 @@ class _ChatPageState extends State<ChatPage> {
                         );
                       }
 
-                      final chatRooms = [];
                       return StreamBuilder<QuerySnapshot>(
                         stream: db.collection('dm').snapshots(),
                         builder: (BuildContext context,

@@ -96,6 +96,7 @@ class _ChatTileState extends State<ChatTile> {
                   builder: (context) => GroupChatPage(
                     name: widget.name,
                     groupId: widget.chatId,
+                    chatIndex: widget.chatIndex,
                   ),
                 ),
               );

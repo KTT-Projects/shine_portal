@@ -8,11 +8,13 @@ import 'package:shine_portal/pages/chat_settings.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String groupId;
+  int chatIndex = 0;
   String name;
   GroupChatPage({
     Key? key,
     required this.name,
     required this.groupId,
+    required this.chatIndex,
   });
 
   @override
@@ -131,22 +133,41 @@ class ChatRoomState extends State<GroupChatPage> {
                   i++) {
                 _addMessage(sender[i], messages[i], i.toString(), time[i]);
               }
-              return Chat(
-                theme: const DefaultChatTheme(
-                    backgroundColor: Color(0xFFF0F5FA),
-                    primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
-                    userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
-                    sentMessageDocumentIconColor:
-                        Color.fromARGB(221, 49, 32, 32),
-                    secondaryColor: Color(0xFFFFFFFF),
-                    inputBackgroundColor: Color(0xFFFFFFFF),
-                    inputTextColor: Color(0xFF1C1D21)),
-                user: _user,
-                messages: _messages,
-                onSendPressed: _handleSendPressed,
-                showUserAvatars: true,
-                showUserNames: true,
-              );
+              return StreamBuilder<QuerySnapshot>(
+                  stream: db.collection('userData').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    // set last seen to the number of messages
+                    final groupLastSeen = List<int>.from(snapshot.data!.docs
+                        .firstWhere(
+                            (doc) => doc.id == userId)['groupLastSeen']);
+                    groupLastSeen[widget.chatIndex] = messages.length;
+                    db.collection('userData').doc(userId).update({
+                      'groupLastSeen': groupLastSeen,
+                    });
+                    return Chat(
+                      theme: const DefaultChatTheme(
+                          backgroundColor: Color(0xFFF0F5FA),
+                          primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
+                          userAvatarNameColors: [
+                            Colors.black87
+                          ], // ユーザー名の文字色の変更
+                          sentMessageDocumentIconColor:
+                              Color.fromARGB(221, 49, 32, 32),
+                          secondaryColor: Color(0xFFFFFFFF),
+                          inputBackgroundColor: Color(0xFFFFFFFF),
+                          inputTextColor: Color(0xFF1C1D21)),
+                      user: _user,
+                      messages: _messages,
+                      onSendPressed: _handleSendPressed,
+                      showUserAvatars: true,
+                      showUserNames: true,
+                    );
+                  });
             }),
       );
 

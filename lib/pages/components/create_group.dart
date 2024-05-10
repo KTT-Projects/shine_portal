@@ -133,7 +133,11 @@ class _CreateGroupState extends State<CreateGroup> {
     }
 
     CollectionReference userData = db.collection('userData');
-    userData.doc(userId);
+    // get the number of groups for the user creating the group
+    final docRef = userData.doc(userId);
+    final docSnapshot = await docRef.get();
+    final data = docSnapshot.data() as Map<String, dynamic>;
+    int chatIndex = data['group'].length;
     users.add(userId);
     CollectionReference group = db.collection('group');
     final newDocRef = await group.add({
@@ -153,6 +157,7 @@ class _CreateGroupState extends State<CreateGroup> {
         data2['group'] = [];
       }
       data2['group'].add(newDocId);
+      data2['groupLastSeen'].add(0);
       docRef2.update(data2);
     }
     setState(() {
@@ -165,6 +170,7 @@ class _CreateGroupState extends State<CreateGroup> {
         builder: (context) => GroupChatPage(
           name: _textFieldValue,
           groupId: newDocId,
+          chatIndex: chatIndex,
         ),
       ),
     );

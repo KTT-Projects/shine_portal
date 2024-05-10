@@ -24,6 +24,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '');
+  int? lastSeenWhenOpened;
 
   void _addMessage(String author, String message, String id, final time) {
     final types.TextMessage textMessage;
@@ -91,7 +92,8 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
               for (var i = 0;
                   i < min(messages.length, min(sender.length, time.length));
                   i++) {
-                _addMessage(sender[i], messages[i], i.toString(), time[i]);
+                _addMessage(
+                    sender[i], messages[i], (i + 1).toString(), time[i]);
               }
               return StreamBuilder<QuerySnapshot>(
                   stream: db.collection('userData').snapshots(),
@@ -104,6 +106,8 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                     // set last seen to the number of messages
                     final dmLastSeen = List<int>.from(snapshot.data!.docs
                         .firstWhere((doc) => doc.id == userId)['dmLastSeen']);
+                    lastSeenWhenOpened ??= dmLastSeen[widget.chatIndex];
+                    // set last seen to global variable for scrollToUnread feature
                     dmLastSeen[widget.chatIndex] = messages.length;
                     db.collection('userData').doc(userId).update({
                       'dmLastSeen': dmLastSeen,
@@ -125,12 +129,19 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                       user: _user,
                       showUserAvatars: true,
                       showUserNames: true,
+                      scrollToUnreadOptions: ScrollToUnreadOptions(
+                        lastReadMessageId: lastSeenWhenOpened.toString(),
+                        scrollOnOpen: true,
+                      ),
                     );
                   });
             }),
       );
 
   void _handleSendPressed(types.PartialText message) {
+    setState(() {
+      lastSeenWhenOpened = _messages.length + 1;
+    });
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
