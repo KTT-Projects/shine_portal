@@ -7,10 +7,12 @@ import 'package:flutter_chat_ui/flutter_chat_ui.dart';
 
 class IndividualChatRoom extends StatefulWidget {
   final String name, dmId;
+  final int chatIndex;
   const IndividualChatRoom({
     super.key,
     required this.name,
     required this.dmId,
+    required this.chatIndex,
   });
 
   @override
@@ -91,22 +93,40 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                   i++) {
                 _addMessage(sender[i], messages[i], i.toString(), time[i]);
               }
-              return Chat(
-                // 追加
-                theme: const DefaultChatTheme(
-                    backgroundColor: Color(0xFFF0F5FA),
-                    primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
-                    userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
-                    sentMessageDocumentIconColor: Colors.black87,
-                    secondaryColor: Color(0xFFFFFFFF),
-                    inputBackgroundColor: Color(0xFFFFFFFF),
-                    inputTextColor: Color(0xFF1C1D21)),
-                messages: _messages,
-                onSendPressed: _handleSendPressed,
-                user: _user,
-                showUserAvatars: true,
-                showUserNames: true,
-              );
+              return StreamBuilder<QuerySnapshot>(
+                  stream: db.collection('userData').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    // set last seen to the number of messages
+                    final dmLastSeen = List<int>.from(snapshot.data!.docs
+                        .firstWhere((doc) => doc.id == userId)['dmLastSeen']);
+                    dmLastSeen[widget.chatIndex] = messages.length;
+                    db.collection('userData').doc(userId).update({
+                      'dmLastSeen': dmLastSeen,
+                    });
+                    return Chat(
+                      // 追加
+                      theme: const DefaultChatTheme(
+                          backgroundColor: Color(0xFFF0F5FA),
+                          primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
+                          userAvatarNameColors: [
+                            Colors.black87
+                          ], // ユーザー名の文字色の変更
+                          sentMessageDocumentIconColor: Colors.black87,
+                          secondaryColor: Color(0xFFFFFFFF),
+                          inputBackgroundColor: Color(0xFFFFFFFF),
+                          inputTextColor: Color(0xFF1C1D21)),
+                      messages: _messages,
+                      onSendPressed: _handleSendPressed,
+                      user: _user,
+                      showUserAvatars: true,
+                      showUserNames: true,
+                    );
+                  });
             }),
       );
 

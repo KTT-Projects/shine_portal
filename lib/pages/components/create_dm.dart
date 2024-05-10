@@ -18,6 +18,7 @@ class _CreateDmState extends State<CreateDm> {
   final db = FirebaseFirestore.instance;
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+  int chatIndex = 0;
 
   bool isLoading = false; // Added loading state
 
@@ -100,6 +101,7 @@ class _CreateDmState extends State<CreateDm> {
       final newDocId = newDocRef.id;
       data['dm'].add(_searchFieldValue.toLowerCase());
       data['dmId'].add(newDocId);
+      data['dmLastSeen'].add(0);
       docRef.update(data);
       final docRef2 = userData.doc(_searchFieldValue.toLowerCase());
       final docSnapshot2 = await docRef2.get();
@@ -111,8 +113,10 @@ class _CreateDmState extends State<CreateDm> {
         }
         data2['dm'].add(userId);
         data2['dmId'].add(newDocId);
+        data2['dmLastSeen'].add(0);
         docRef2.update(data2);
       }
+      chatIndex = data['dm'].length - 1;
       dmId_ = newDocId;
     }
     setState(() {
@@ -125,6 +129,7 @@ class _CreateDmState extends State<CreateDm> {
         builder: (context) => IndividualChatRoom(
           name: capitalize(_searchFieldValue.toLowerCase()),
           dmId: dmId_,
+          chatIndex: chatIndex,
         ),
       ),
     );

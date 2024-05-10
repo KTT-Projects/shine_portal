@@ -56,6 +56,8 @@ class _HomePageState extends State<HomePage> {
         'dm': [],
         'group': [],
         'dmId': [],
+        'dmLastSeen': [],
+        'groupLastSeen': [],
       });
     }
   }
