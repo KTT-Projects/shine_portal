@@ -107,7 +107,6 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                     final dmLastSeen = List<int>.from(snapshot.data!.docs
                         .firstWhere((doc) => doc.id == userId)['dmLastSeen']);
                     lastSeenWhenOpened ??= dmLastSeen[widget.chatIndex];
-                    // set last seen to global variable for scrollToUnread feature
                     dmLastSeen[widget.chatIndex] = messages.length;
                     db.collection('userData').doc(userId).update({
                       'dmLastSeen': dmLastSeen,

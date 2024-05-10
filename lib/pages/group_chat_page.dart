@@ -26,6 +26,7 @@ class ChatRoomState extends State<GroupChatPage> {
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _messages = [];
   final _user = const types.User(id: '');
+  int? lastSeenWhenOpened;
 
   // Capitalize the first letter of a string
   String capitalize(String s) {
@@ -145,6 +146,7 @@ class ChatRoomState extends State<GroupChatPage> {
                     final groupLastSeen = List<int>.from(snapshot.data!.docs
                         .firstWhere(
                             (doc) => doc.id == userId)['groupLastSeen']);
+                    lastSeenWhenOpened ??= groupLastSeen[widget.chatIndex];
                     groupLastSeen[widget.chatIndex] = messages.length;
                     db.collection('userData').doc(userId).update({
                       'groupLastSeen': groupLastSeen,
@@ -166,6 +168,10 @@ class ChatRoomState extends State<GroupChatPage> {
                       onSendPressed: _handleSendPressed,
                       showUserAvatars: true,
                       showUserNames: true,
+                      scrollToUnreadOptions: ScrollToUnreadOptions(
+                        lastReadMessageId: lastSeenWhenOpened.toString(),
+                        scrollOnOpen: true,
+                      ),
                     );
                   });
             }),
