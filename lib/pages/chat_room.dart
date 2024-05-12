@@ -22,9 +22,10 @@ class IndividualChatRoom extends StatefulWidget {
 class IndividualChatRoomState extends State<IndividualChatRoom> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
-  final List<types.Message> _messages = [];
+  final List<types.Message> _databaseMessages = [];
   final _user = const types.User(id: '');
   int? lastSeenWhenOpened;
+  types.Message? _sendingMessage;
 
   void _addMessage(String author, String message, String id, final time) {
     final types.TextMessage textMessage;
@@ -43,7 +44,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
         text: message,
       );
     }
-    _messages.insert(0, textMessage);
+    _databaseMessages.insert(0, textMessage);
   }
 
   //他のユーザーの情報を取得
@@ -77,7 +78,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
         body: StreamBuilder<QuerySnapshot>(
             stream: db.collection('dm').snapshots(),
             builder: (context, snapshot) {
-              _messages.clear();
+              _databaseMessages.clear();
               if (!snapshot.hasData) {
                 return const Center(
                   child: CircularProgressIndicator(),
@@ -111,26 +112,49 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                     db.collection('userData').doc(userId).update({
                       'dmLastSeen': dmLastSeen,
                     });
+                    final List<types.Message> finalMessages = [];
+                    finalMessages.addAll(_databaseMessages);
+                    if (_sendingMessage != null) {
+                      for (var i = 0; i < finalMessages.length; i++) {
+                        if (finalMessages[i].id == _sendingMessage!.id) {
+                          _sendingMessage = null;
+                          break;
+                        }
+                      }
+                      if (_sendingMessage != null) {
+                        finalMessages.insert(0, _sendingMessage!);
+                      }
+                    }
                     return Chat(
-                      // 追加
                       theme: const DefaultChatTheme(
                           backgroundColor: Color(0xFFF0F5FA),
                           primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
                           userAvatarNameColors: [
                             Colors.black87
                           ], // ユーザー名の文字色の変更
-                          sentMessageDocumentIconColor: Colors.black87,
+                          sentMessageDocumentIconColor:
+                              Color.fromARGB(221, 49, 32, 32),
                           secondaryColor: Color(0xFFFFFFFF),
                           inputBackgroundColor: Color(0xFFFFFFFF),
                           inputTextColor: Color(0xFF1C1D21)),
-                      messages: _messages,
-                      onSendPressed: _handleSendPressed,
                       user: _user,
+                      messages: finalMessages,
+                      onSendPressed: _handleSendPressed,
                       showUserAvatars: true,
                       showUserNames: true,
                       scrollToUnreadOptions: ScrollToUnreadOptions(
                         lastReadMessageId: lastSeenWhenOpened.toString(),
                         scrollOnOpen: true,
+                      ),
+                      l10n: const ChatL10nEn(
+                        inputPlaceholder: 'メッセージを入力',
+                        unreadMessagesLabel: '未読メッセージ',
+                      ),
+                      isAttachmentUploading: _sendingMessage != null,
+                      inputOptions: InputOptions(
+                        inputClearMode: _sendingMessage != null
+                            ? InputClearMode.never
+                            : InputClearMode.always,
                       ),
                     );
                   });
@@ -138,15 +162,37 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
       );
 
   void _handleSendPressed(types.PartialText message) {
-    setState(() {
-      lastSeenWhenOpened = _messages.length + 1;
-    });
+    if (_sendingMessage != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('メッセージ送信中'),
+            content: const Text('前のメッセージが送信されるまでお待ちください。'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: _messages.length.toString(),
+      id: (_databaseMessages.length + 1).toString(),
       text: message.text,
+      status: types.Status.sending,
     );
+    setState(() {
+      lastSeenWhenOpened = _databaseMessages.length + 1;
+      _sendingMessage = textMessage;
+    });
     db.collection('dm').doc(widget.dmId).get().then((doc) {
       final messages = List<String>.from(doc.data()!['messages']);
       final sender = List<String>.from(doc.data()!['sender']);

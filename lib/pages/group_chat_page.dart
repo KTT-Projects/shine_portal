@@ -24,9 +24,10 @@ class GroupChatPage extends StatefulWidget {
 class ChatRoomState extends State<GroupChatPage> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
-  final List<types.Message> _messages = [];
+  List<types.Message> _databaseMessages = [];
   final _user = const types.User(id: '');
   int? lastSeenWhenOpened;
+  types.Message? _sendingMessage;
 
   // Capitalize the first letter of a string
   String capitalize(String s) {
@@ -56,7 +57,7 @@ class ChatRoomState extends State<GroupChatPage> {
         text: message,
       );
     }
-    _messages.insert(0, textMessage);
+    _databaseMessages.insert(0, textMessage);
   }
 
   @override
@@ -122,7 +123,7 @@ class ChatRoomState extends State<GroupChatPage> {
                   child: CircularProgressIndicator(),
                 );
               }
-              _messages.clear();
+              _databaseMessages.clear();
               final messages = List<String>.from(snapshot.data!.docs
                   .firstWhere((doc) => doc.id == widget.groupId)['messages']);
               final sender = List<String>.from(snapshot.data!.docs
@@ -152,6 +153,19 @@ class ChatRoomState extends State<GroupChatPage> {
                     db.collection('userData').doc(userId).update({
                       'groupLastSeen': groupLastSeen,
                     });
+                    final List<types.Message> finalMessages = [];
+                    finalMessages.addAll(_databaseMessages);
+                    if (_sendingMessage != null) {
+                      for (var i = 0; i < finalMessages.length; i++) {
+                        if (finalMessages[i].id == _sendingMessage!.id) {
+                          _sendingMessage = null;
+                          break;
+                        }
+                      }
+                      if (_sendingMessage != null) {
+                        finalMessages.insert(0, _sendingMessage!);
+                      }
+                    }
                     return Chat(
                       theme: const DefaultChatTheme(
                           backgroundColor: Color(0xFFF0F5FA),
@@ -165,7 +179,7 @@ class ChatRoomState extends State<GroupChatPage> {
                           inputBackgroundColor: Color(0xFFFFFFFF),
                           inputTextColor: Color(0xFF1C1D21)),
                       user: _user,
-                      messages: _messages,
+                      messages: finalMessages,
                       onSendPressed: _handleSendPressed,
                       showUserAvatars: true,
                       showUserNames: true,
@@ -173,18 +187,54 @@ class ChatRoomState extends State<GroupChatPage> {
                         lastReadMessageId: lastSeenWhenOpened.toString(),
                         scrollOnOpen: true,
                       ),
+                      l10n: const ChatL10nEn(
+                        inputPlaceholder: 'メッセージを入力',
+                        unreadMessagesLabel: '未読メッセージ',
+                      ),
+                      isAttachmentUploading: _sendingMessage != null,
+                      inputOptions: InputOptions(
+                        inputClearMode: _sendingMessage != null
+                            ? InputClearMode.never
+                            : InputClearMode.always,
+                      ),
                     );
                   });
+              // });
             }),
       );
 
   void _handleSendPressed(types.PartialText message) {
+    if (_sendingMessage != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('メッセージ送信中'),
+            content: const Text('前のメッセージが送信されるまでお待ちください。'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: _messages.length.toString(),
+      id: (_databaseMessages.length + 1).toString(),
       text: message.text,
+      status: types.Status.sending,
     );
+    setState(() {
+      lastSeenWhenOpened = _databaseMessages.length + 1;
+      _sendingMessage = textMessage;
+    });
     db.collection('group').doc(widget.groupId).get().then((doc) {
       final messages = List<String>.from(doc.data()!['messages']);
       final sender = List<String>.from(doc.data()!['sender']);

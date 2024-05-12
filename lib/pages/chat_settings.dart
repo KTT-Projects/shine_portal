@@ -198,17 +198,25 @@ class _ChatSettingsState extends State<ChatSettings> {
           db.collection('userData').doc(user).get().then((doc) {
             List groups = List<String>.from(doc.data()!['group']);
             groups.add(widget.groupId);
+            List lastSeen = List<int>.from(doc.data()!['groupLastSeen']);
+            lastSeen.add(0);
             db.collection('userData').doc(user).update({
               'group': groups,
+              'groupLastSeen': lastSeen,
             });
           });
         }
         for (var user in deletedUsers) {
           db.collection('userData').doc(user).get().then((doc) {
             List groups = List<String>.from(doc.data()!['group']);
+            // get the index of the group to be removed
+            final index = groups.indexOf(widget.groupId);
             groups.remove(widget.groupId);
+            List lastSeen = List<int>.from(doc.data()!['groupLastSeen']);
+            lastSeen.removeAt(index);
             db.collection('userData').doc(user).update({
               'group': groups,
+              'groupLastSeen': lastSeen,
             });
           });
         }

@@ -53,10 +53,9 @@ class _ChatTileState extends State<ChatTile> {
 
     // Format the time based on the message's timestamp
     if (widget.latest_time.isAfter(today)) {
-      formattedTime = 'Today ${DateFormat('HH:mm').format(widget.latest_time)}';
+      formattedTime = '今日 ${DateFormat('HH:mm').format(widget.latest_time)}';
     } else if (widget.latest_time.isAfter(yesterday)) {
-      formattedTime =
-          'Yesterday ${DateFormat('HH:mm').format(widget.latest_time)}';
+      formattedTime = '昨日 ${DateFormat('HH:mm').format(widget.latest_time)}';
     } else if (widget.latest_time.year == now.year) {
       formattedTime = DateFormat('MMM d, HH:mm').format(widget.latest_time);
     } else {
