@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:intl/intl.dart';
 import 'package:shine_portal/pages/chat_room.dart';
+import 'package:shine_portal/pages/group_chat_page.dart';
 
 class ChatTile extends StatefulWidget {
   final String name;
@@ -64,7 +65,7 @@ class _ChatTileState extends State<ChatTile> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => IndivisualChatRoom(name: widget.name),
+                builder: (context) => GroupChatPage(name: widget.name),
               ),
             );
           },

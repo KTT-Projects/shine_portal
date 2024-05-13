@@ -172,7 +172,7 @@ class _CreateGroupState extends State<CreateGroup> {
       context,
       MaterialPageRoute(
         builder: (context) => GroupChatPage(
-            // name: _textFieldValue,
+            name: _textFieldValue,
             ),
       ),
     );

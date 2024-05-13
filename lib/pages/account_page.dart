@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_picker_for_web/image_picker_for_web.dart';
+
 
 class AccountPage extends StatefulWidget {
   const AccountPage({super.key});
@@ -22,6 +26,9 @@ class _AccountPageState extends State<AccountPage> {
     if (s.isEmpty) return s;
     return s[0].toUpperCase() + s.substring(1);
   }
+
+  final ImagePicker _picker = ImagePicker();
+  File? _file;
 
   @override
   Widget build(BuildContext context) {
@@ -95,6 +102,29 @@ class _AccountPageState extends State<AccountPage> {
               ),
             ),
           ),
+          //profile image
+          Stack(
+            children: <Widget>[
+              CircleAvatar(
+                backgroundImage: AssetImage('url' ),
+                radius: 50.0,
+              ),
+              RawMaterialButton(
+                onPressed: () async {
+                  final XFile? _image =
+                      await _picker.pickImage(source: ImageSource.gallery);
+                  _file = File(_image!.path);
+                  setState(() {});
+                },
+                child: Container(
+                  width: 100.0, // CircleAvatarのradiusの2倍
+                  height: 100.0,
+                ),
+                shape: new CircleBorder(),
+                elevation: 0.0,
+              ),
+            ],
+          )
         ],
       ),
     );
