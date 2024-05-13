@@ -23,7 +23,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
   final List<types.Message> _databaseMessages = [];
-  final _user = const types.User(id: '');
+  // final _user = const types.User(id: 'this');
   int? lastSeenWhenOpened;
   types.Message? _sendingMessage;
 
@@ -47,10 +47,20 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
     _databaseMessages.insert(0, textMessage);
   }
 
+  String capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
+  }
+
   //他のユーザーの情報を取得
   types.User get _other => types.User(
         id: widget.name,
         firstName: widget.name,
+      );
+
+  types.User get _user => types.User(
+        id: capitalize(userId),
+        firstName: userId,
       );
 
   @override
@@ -123,6 +133,24 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                       }
                       if (_sendingMessage != null) {
                         finalMessages.insert(0, _sendingMessage!);
+                      }
+                    }
+                    // get the last seen index for the other user and change the status of the messages this user sent
+                    final otherUser = snapshot.data!.docs.firstWhere(
+                        (doc) => doc.id == widget.name.toLowerCase());
+                    final otherUserLastSeen =
+                        List<int>.from(otherUser['dmLastSeen']);
+                    final otherUserDmIds = List<String>.from(otherUser['dmId']);
+                    final otherUserChatIndex =
+                        otherUserDmIds.indexOf(widget.dmId);
+                    for (var i = 0; i < finalMessages.length; i++) {
+                      int index = finalMessages.length - i - 1;
+                      if (finalMessages[index].author.id == _user.id &&
+                          (i + 1) < otherUserLastSeen[otherUserChatIndex]) {
+                        // update the status of the message to sent
+                        finalMessages[index] = finalMessages[index].copyWith(
+                          status: types.Status.seen,
+                        );
                       }
                     }
                     return Chat(
