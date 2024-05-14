@@ -146,7 +146,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                     for (var i = 0; i < finalMessages.length; i++) {
                       int index = finalMessages.length - i - 1;
                       if (finalMessages[index].author.id == _user.id &&
-                          (i + 1) < otherUserLastSeen[otherUserChatIndex]) {
+                          i < otherUserLastSeen[otherUserChatIndex]) {
                         // update the status of the message to sent
                         finalMessages[index] = finalMessages[index].copyWith(
                           status: types.Status.seen,
@@ -169,7 +169,7 @@ class IndividualChatRoomState extends State<IndividualChatRoom> {
                       messages: finalMessages,
                       onSendPressed: _handleSendPressed,
                       showUserAvatars: true,
-                      showUserNames: true,
+                      showUserNames: false,
                       scrollToUnreadOptions: ScrollToUnreadOptions(
                         lastReadMessageId: lastSeenWhenOpened.toString(),
                         scrollOnOpen: true,
