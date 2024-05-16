@@ -8,11 +8,13 @@ import 'package:shine_portal/pages/chat_settings.dart';
 
 class GroupChatPage extends StatefulWidget {
   final String groupId;
+  int chatIndex = 0;
   String name;
   GroupChatPage({
     Key? key,
     required this.name,
     required this.groupId,
+    required this.chatIndex,
   });
 
   @override
@@ -22,8 +24,10 @@ class GroupChatPage extends StatefulWidget {
 class ChatRoomState extends State<GroupChatPage> {
   String userId =
       FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
-  final List<types.Message> _messages = [];
+  List<types.Message> _databaseMessages = [];
   final _user = const types.User(id: '');
+  int? lastSeenWhenOpened;
+  types.Message? _sendingMessage;
 
   // Capitalize the first letter of a string
   String capitalize(String s) {
@@ -53,7 +57,7 @@ class ChatRoomState extends State<GroupChatPage> {
         text: message,
       );
     }
-    _messages.insert(0, textMessage);
+    _databaseMessages.insert(0, textMessage);
   }
 
   @override
@@ -119,7 +123,7 @@ class ChatRoomState extends State<GroupChatPage> {
                   child: CircularProgressIndicator(),
                 );
               }
-              _messages.clear();
+              _databaseMessages.clear();
               final messages = List<String>.from(snapshot.data!.docs
                   .firstWhere((doc) => doc.id == widget.groupId)['messages']);
               final sender = List<String>.from(snapshot.data!.docs
@@ -129,34 +133,108 @@ class ChatRoomState extends State<GroupChatPage> {
               for (var i = 0;
                   i < min(messages.length, min(sender.length, time.length));
                   i++) {
-                _addMessage(sender[i], messages[i], i.toString(), time[i]);
+                _addMessage(
+                    sender[i], messages[i], (i + 1).toString(), time[i]);
               }
-              return Chat(
-                theme: const DefaultChatTheme(
-                    backgroundColor: Color(0xFFF0F5FA),
-                    primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
-                    userAvatarNameColors: [Colors.black87], // ユーザー名の文字色の変更
-                    sentMessageDocumentIconColor:
-                        Color.fromARGB(221, 49, 32, 32),
-                    secondaryColor: Color(0xFFFFFFFF),
-                    inputBackgroundColor: Color(0xFFFFFFFF),
-                    inputTextColor: Color(0xFF1C1D21)),
-                user: _user,
-                messages: _messages,
-                onSendPressed: _handleSendPressed,
-                showUserAvatars: true,
-                showUserNames: true,
-              );
+              return StreamBuilder<QuerySnapshot>(
+                  stream: db.collection('userData').snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    // set last seen to the number of messages
+                    final groupLastSeen = List<int>.from(snapshot.data!.docs
+                        .firstWhere(
+                            (doc) => doc.id == userId)['groupLastSeen']);
+                    lastSeenWhenOpened ??= groupLastSeen[widget.chatIndex];
+                    groupLastSeen[widget.chatIndex] = messages.length;
+                    db.collection('userData').doc(userId).update({
+                      'groupLastSeen': groupLastSeen,
+                    });
+                    final List<types.Message> finalMessages = [];
+                    finalMessages.addAll(_databaseMessages);
+                    if (_sendingMessage != null) {
+                      for (var i = 0; i < finalMessages.length; i++) {
+                        if (finalMessages[i].id == _sendingMessage!.id) {
+                          _sendingMessage = null;
+                          break;
+                        }
+                      }
+                      if (_sendingMessage != null) {
+                        finalMessages.insert(0, _sendingMessage!);
+                      }
+                    }
+                    return Chat(
+                      theme: const DefaultChatTheme(
+                          backgroundColor: Color(0xFFF0F5FA),
+                          primaryColor: Color(0xFF3E5C79), // メッセージの背景色の変更
+                          userAvatarNameColors: [
+                            Colors.black87
+                          ], // ユーザー名の文字色の変更
+                          sentMessageDocumentIconColor:
+                              Color.fromARGB(221, 49, 32, 32),
+                          secondaryColor: Color(0xFFFFFFFF),
+                          inputBackgroundColor: Color(0xFFFFFFFF),
+                          inputTextColor: Color(0xFF1C1D21)),
+                      user: _user,
+                      messages: finalMessages,
+                      onSendPressed: _handleSendPressed,
+                      showUserAvatars: true,
+                      showUserNames: true,
+                      scrollToUnreadOptions: ScrollToUnreadOptions(
+                        lastReadMessageId: lastSeenWhenOpened.toString(),
+                        scrollOnOpen: true,
+                      ),
+                      l10n: const ChatL10nEn(
+                        inputPlaceholder: 'メッセージを入力',
+                        unreadMessagesLabel: '未読メッセージ',
+                      ),
+                      isAttachmentUploading: _sendingMessage != null,
+                      inputOptions: InputOptions(
+                        inputClearMode: _sendingMessage != null
+                            ? InputClearMode.never
+                            : InputClearMode.always,
+                      ),
+                    );
+                  });
+              // });
             }),
       );
 
   void _handleSendPressed(types.PartialText message) {
+    if (_sendingMessage != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text('メッセージ送信中'),
+            content: const Text('前のメッセージが送信されるまでお待ちください。'),
+            actions: [
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
     final textMessage = types.TextMessage(
       author: _user,
       createdAt: DateTime.now().millisecondsSinceEpoch,
-      id: _messages.length.toString(),
+      id: (_databaseMessages.length + 1).toString(),
       text: message.text,
+      status: types.Status.sending,
     );
+    setState(() {
+      lastSeenWhenOpened = _databaseMessages.length + 1;
+      _sendingMessage = textMessage;
+    });
     db.collection('group').doc(widget.groupId).get().then((doc) {
       final messages = List<String>.from(doc.data()!['messages']);
       final sender = List<String>.from(doc.data()!['sender']);

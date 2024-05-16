@@ -198,17 +198,25 @@ class _ChatSettingsState extends State<ChatSettings> {
           db.collection('userData').doc(user).get().then((doc) {
             List groups = List<String>.from(doc.data()!['group']);
             groups.add(widget.groupId);
+            List lastSeen = List<int>.from(doc.data()!['groupLastSeen']);
+            lastSeen.add(0);
             db.collection('userData').doc(user).update({
               'group': groups,
+              'groupLastSeen': lastSeen,
             });
           });
         }
         for (var user in deletedUsers) {
           db.collection('userData').doc(user).get().then((doc) {
             List groups = List<String>.from(doc.data()!['group']);
+            // get the index of the group to be removed
+            final index = groups.indexOf(widget.groupId);
             groups.remove(widget.groupId);
+            List lastSeen = List<int>.from(doc.data()!['groupLastSeen']);
+            lastSeen.removeAt(index);
             db.collection('userData').doc(user).update({
               'group': groups,
+              'groupLastSeen': lastSeen,
             });
           });
         }
@@ -230,7 +238,19 @@ class _ChatSettingsState extends State<ChatSettings> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(context);
+                if (isLoading) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'ロード中です。キャンセルはできません。',
+                        textAlign: TextAlign.center,
+                      ),
+                      backgroundColor: Color(0xFFFF6B6B),
+                    ),
+                  );
+                } else {
+                  Navigator.pop(context);
+                }
               },
               child: const Text('キャンセル'),
             ),
@@ -259,9 +279,13 @@ class _ChatSettingsState extends State<ChatSettings> {
                 final userDoc =
                     await db.collection('userData').doc(userId).get();
                 List groups = List<String>.from(userDoc.data()!['group']);
+                List lastSeen =
+                    List<int>.from(userDoc.data()!['groupLastSeen']);
+                lastSeen.removeAt(groups.indexOf(widget.groupId));
                 groups.remove(widget.groupId);
                 await db.collection('userData').doc(userId).update({
                   'group': groups,
+                  'groupLastSeen': lastSeen,
                 });
                 if (usersList.isEmpty) {
                   await db.collection('group').doc(widget.groupId).delete();
@@ -269,6 +293,7 @@ class _ChatSettingsState extends State<ChatSettings> {
                 setState(() {
                   isLoading = false; // Hide loading indicator
                 });
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 Navigator.popUntil(context, (route) => route.isFirst);
               },
               child: const Text('退出'),
