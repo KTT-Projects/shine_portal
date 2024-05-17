@@ -25,10 +25,8 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  final List<TextEditingController> _controllers =
-      List.generate(4, (index) => TextEditingController());
-  final List<TimeOfDay> _selectedTime =
-      List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
+  final List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  final List<TimeOfDay> _selectedTime = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   Future<void> _selectTime(BuildContext context, int index) async {
     _selectedTime[index] = (await showTimePicker(
       context: context,
@@ -123,6 +121,7 @@ class _CalendarPageState extends State<CalendarPage> {
 
   final db = FirebaseFirestore.instance;
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
       stream: db.collection('training').snapshots(),
