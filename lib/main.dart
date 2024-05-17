@@ -30,12 +30,12 @@ class MyApp extends StatelessWidget {
         // fontFamily: GoogleFonts.mPlus1p().fontFamily,
         textTheme: GoogleFonts.mPlus1pTextTheme(),
       ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF3E5C79),
-          brightness: Brightness.dark,
-        ),
-      ),
+      // darkTheme: ThemeData(
+      //   colorScheme: ColorScheme.fromSeed(
+      //     seedColor: const Color(0xFF3E5C79),
+      //     brightness: Brightness.dark,
+      //   ),
+      // ),
       home: const MainPage(),
     );
   }

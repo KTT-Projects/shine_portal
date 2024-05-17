@@ -19,10 +19,13 @@ ${BUILT_PRODUCTS_DIR}/RecaptchaInterop/RecaptchaInterop.framework
 ${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework
 ${BUILT_PRODUCTS_DIR}/SwiftyGif/SwiftyGif.framework
 ${BUILT_PRODUCTS_DIR}/abseil/absl.framework
+${BUILT_PRODUCTS_DIR}/device_info_plus/device_info_plus.framework
 ${BUILT_PRODUCTS_DIR}/file_picker/file_picker.framework
-${BUILT_PRODUCTS_DIR}/flutter_pdfview/flutter_pdfview.framework
+${BUILT_PRODUCTS_DIR}/flutter_file_dialog/flutter_file_dialog.framework
 ${BUILT_PRODUCTS_DIR}/gRPC-C++/grpcpp.framework
 ${BUILT_PRODUCTS_DIR}/gRPC-Core/grpc.framework
 ${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework
 ${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework
 ${BUILT_PRODUCTS_DIR}/path_provider_foundation/path_provider_foundation.framework
+${BUILT_PRODUCTS_DIR}/pdfx/pdfx.framework
+${BUILT_PRODUCTS_DIR}/url_launcher_ios/url_launcher_ios.framework
