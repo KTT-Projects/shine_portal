@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+/// A page for user login.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -16,6 +17,7 @@ class _LoginPageState extends State<LoginPage> {
   // Prevent concurrent button presses
   bool _waiting = false; // Added loading state
 
+  /// Function to handle the login process.
   Future login() async {
     setState(() {
       _waiting = true;
@@ -85,6 +87,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  // Logo
                   Padding(
                     padding: const EdgeInsets.only(bottom: 30),
                     child: ShaderMask(
@@ -105,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   ),
+                  // Title
                   ShaderMask(
                     shaderCallback: (bounds) => const LinearGradient(
                       colors: [
@@ -128,6 +132,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 20,
                   ),
+                  // Input fields
                   const Text(
                     'IDとパスワードを以下の欄に入力してください',
                     style: TextStyle(
@@ -170,6 +175,7 @@ class _LoginPageState extends State<LoginPage> {
                   const SizedBox(
                     height: 30,
                   ),
+                  // Login button
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 100),
                     child: SizedBox(
