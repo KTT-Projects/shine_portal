@@ -103,11 +103,13 @@ class _CalendarPageState extends State<CalendarPage> {
 
   var _pdfController = null;
   Uint8List? _pdfBytes;
+  String? _docId;
   Future<Uint8List> getPdf(String docId, String fileName) async {
     final data = await FirebaseStorage.instance
         .ref()
         .child('training/$docId/$fileName')
         .getData();
+    _docId = docId;
     return data as Uint8List;
   }
 
@@ -285,7 +287,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                           Builder(
                                             builder: (context) {
                                               if (!kIsWeb) {
-                                                if (_pdfBytes == null) {
+                                                if (_pdfBytes == null || _docId != event['id']) {
                                                   getPdf(event['id'],
                                                           event['pdf'])
                                                       .then((value) =>
