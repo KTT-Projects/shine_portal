@@ -88,14 +88,17 @@ class _CalendarPageState extends State<CalendarPage> {
       'timeFinish': _controllers[2].text,
       'detail': _controllers[3].text,
       'pdf': _pdfName,
-    }).then((value) => FirebaseStorage.instance
-        .ref()
-        .child('training/${value.id}/$_pdfName')
-        .putData(_pdf!));
+    }).then((value) async {
+      await FirebaseStorage.instance
+          .ref()
+          .child('training/${value.id}/$_pdfName')
+          .putData(_pdf!);
+      _pdf = null;
+    });
     for (var i = 0; i < _controllers.length; i++) {
       _controllers[i].text = '';
     }
-    _pdf = null;
+    _pdfName = null;
   }
 
   var _pdfController = null;
