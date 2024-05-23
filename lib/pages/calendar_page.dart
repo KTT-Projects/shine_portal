@@ -94,11 +94,11 @@ class _CalendarPageState extends State<CalendarPage> {
           .child('training/${value.id}/$_pdfName')
           .putData(_pdf!);
       _pdf = null;
+      _pdfName = null;
     });
     for (var i = 0; i < _controllers.length; i++) {
       _controllers[i].text = '';
     }
-    _pdfName = null;
   }
 
   var _pdfController = null;
@@ -287,7 +287,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                           Builder(
                                             builder: (context) {
                                               if (!kIsWeb) {
-                                                if (_pdfBytes == null || _docId != event['id']) {
+                                                if (_pdfBytes == null ||
+                                                    _docId != event['id']) {
                                                   getPdf(event['id'],
                                                           event['pdf'])
                                                       .then((value) =>
