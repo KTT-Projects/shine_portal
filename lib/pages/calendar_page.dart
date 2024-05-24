@@ -98,23 +98,28 @@ class _CalendarPageState extends State<CalendarPage> {
       'timeFinish': _controllers[2].text,
       'detail': _controllers[3].text,
       'pdf': _pdfName,
-    }).then((value) => FirebaseStorage.instance
-        .ref()
-        .child('training/${value.id}/$_pdfName')
-        .putData(_pdf!));
+    }).then((value) async {
+      await FirebaseStorage.instance
+          .ref()
+          .child('training/${value.id}/$_pdfName')
+          .putData(_pdf!);
+      _pdf = null;
+      _pdfName = null;
+    });
     for (var i = 0; i < _controllers.length; i++) {
       _controllers[i].text = '';
     }
-    _pdf = null;
   }
 
   var _pdfController = null;
   Uint8List? _pdfBytes;
+  String? _docId;
   Future<Uint8List> getPdf(String docId, String fileName) async {
     final data = await FirebaseStorage.instance
         .ref()
         .child('training/$docId/$fileName')
         .getData();
+    _docId = docId;
     return data as Uint8List;
   }
 
@@ -163,11 +168,20 @@ class _CalendarPageState extends State<CalendarPage> {
             'pdf': documents[i]['pdf'],
           });
         }
-        if (_selectedDay != null)
+        // sort events based on timeStart
+        if (_selectedDay != null) {
           selectedEvents = events
               .where((event) =>
                   event['date'] == _selectedDay!.millisecondsSinceEpoch)
               .toList();
+          selectedEvents.sort((a, b) {
+            var aTime = a['start'].split(':');
+            var bTime = b['start'].split(':');
+            return int.parse(aTime[0]) * 60 +
+                int.parse(aTime[1]) -
+                (int.parse(bTime[0]) * 60 + int.parse(bTime[1]));
+          });
+        }
         return Scaffold(
           body: Padding(
             padding: const EdgeInsets.all(8.0),
@@ -283,7 +297,8 @@ class _CalendarPageState extends State<CalendarPage> {
                                           Builder(
                                             builder: (context) {
                                               if (!kIsWeb) {
-                                                if (_pdfBytes == null) {
+                                                if (_pdfBytes == null ||
+                                                    _docId != event['id']) {
                                                   getPdf(event['id'],
                                                           event['pdf'])
                                                       .then((value) =>
