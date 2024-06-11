@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -53,17 +54,26 @@ class _CalendarPageState extends State<CalendarPage> {
   Uint8List? _pdf;
   String? _pdfName;
   Future getPdfFile() async {
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      type: FileType.custom,
-      allowedExtensions: ['pdf'],
-      withData: true,
-    );
+    FilePickerResult? result;
+    if (!kIsWeb) {
+      result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        withData: true,
+      );
+    } else {
+      result = await FilePickerWeb.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
+        withData: true,
+      );
+    }
     if (result != null) {
       _pdf = result.files.single.bytes;
-      if (result.files.single.name.split('.')[1] != 'pdf') {
-        setState(() => _pdfName = '${result.files.single.name}.pdf');
+      if (result.files.single.name.split('.')[result.files.single.name.split('.').length - 1] != 'pdf') {
+        setState(() => _pdfName = '${result?.files.single.name}.pdf');
       } else {
-        setState(() => _pdfName = result.files.single.name);
+        setState(() => _pdfName = result?.files.single.name);
       }
     } else {
       _pdf = null;
@@ -81,7 +91,7 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future saveNewEvent() async {
-    FirebaseFirestore.instance.collection('training').add({
+    await FirebaseFirestore.instance.collection('training').add({
       'date': _selectedDay,
       'title': _controllers[0].text,
       'timeStart': _controllers[1].text,

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-platform :osx, '10.14'
-=======
 platform :osx, '11.0'
->>>>>>> origin/calendar_tasuku
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
