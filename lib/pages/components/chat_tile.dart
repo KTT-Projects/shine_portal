@@ -37,37 +37,60 @@ final db = FirebaseFirestore.instance;
 String userId = FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
 // delete chat when deletion button is pressed
-void deleteChat(BuildContext context, String chatId, int chatIndex, String type) {
+Future<void> deleteChat(BuildContext context, String chatId, int chatIndex, String type) async {
   if (type == 'dm') {
     String otherUser = '';
-    db.collection('userData').doc(userId).get().then((doc) {
+    await db.collection('userData').doc(userId).get().then((doc) {
       otherUser = doc['dm'][chatIndex];
+      otherUser = otherUser.toLowerCase();
+      // get the chat index for the other user
+      int otherIndex = doc['dmId'].indexOf(chatId);
       db.collection('userData').doc(otherUser).update({
         'dm': FieldValue.arrayRemove([userId]),
         'dmId': FieldValue.arrayRemove([chatId]),
       });
+      // delete dmLastSeen according to otherIndex
+      db.collection('userData').doc(otherUser).get().then((doc) {
+        List<dynamic> dmLastSeen = List<dynamic>.from(doc['dmLastSeen']);
+        dmLastSeen.removeAt(otherIndex);
+        db.collection('userData').doc(chatId).update({
+          'dmLastSeen': dmLastSeen,
+        });
+      });
     });
-    db.collection('dm').doc(chatId).delete();
     db.collection('userData').doc(userId).update({
       'dm': FieldValue.arrayRemove([otherUser]),
       'dmId': FieldValue.arrayRemove([chatId]),
     });
+    // delete dmLastSeen according to chatIndex
+    db.collection('userData').doc(userId).get().then((doc) {
+      List<dynamic> dmLastSeen = List<dynamic>.from(doc['dmLastSeen']);
+      dmLastSeen.removeAt(chatIndex);
+      db.collection('userData').doc(userId).update({
+        'dmLastSeen': dmLastSeen,
+      });
+    });
+    db.collection('dm').doc(chatId).delete();
   } else {
     List<String> users = [];
-    db.collection('group').doc(chatId).get().then((doc) {
+    await db.collection('group').doc(chatId).get().then((doc) {
       users = List<String>.from(doc['users']);
-      for (var user in users) {
-        db.collection('userData').doc(user).update({
-          'group': FieldValue.arrayRemove([chatId]),
-        });
-      }
     });
-    db.collection('group').doc(chatId).delete();
     for (var user in users) {
-      db.collection('userData').doc(user).update({
-        'group': FieldValue.arrayRemove([chatId]),
+      // get the chat index for all users
+      await db.collection('userData').doc(user).get().then((doc) {
+        int groupIndex = doc['group'].indexOf(chatId);
+        List<dynamic> groupLastSeen = List<dynamic>.from(doc['groupLastSeen']);
+        List<dynamic> groups = List<dynamic>.from(doc['group']);
+        groupLastSeen.removeAt(groupIndex);
+        groups.remove(chatId);
+        db.collection('userData').doc(user).update({
+          'group': groups,
+          'groupLastSeen': groupLastSeen,
+        });
       });
     }
+    db.collection('group').doc(chatId).delete();
   }
   Navigator.of(context).pop();
 }

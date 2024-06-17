@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -26,10 +25,8 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime? _selectedDay;
   CalendarFormat _calendarFormat = CalendarFormat.month;
 
-  final List<TextEditingController> _controllers =
-      List.generate(4, (index) => TextEditingController());
-  final List<TimeOfDay> _selectedTime =
-      List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
+  final List<TextEditingController> _controllers = List.generate(4, (index) => TextEditingController());
+  final List<TimeOfDay> _selectedTime = List.generate(4, (index) => TimeOfDay(hour: 0, minute: 0));
   Future<void> _selectTime(BuildContext context, int index) async {
     _selectedTime[index] = (await showTimePicker(
       context: context,
@@ -57,12 +54,6 @@ class _CalendarPageState extends State<CalendarPage> {
     FilePickerResult? result;
     if (!kIsWeb) {
       result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        withData: true,
-      );
-    } else {
-      result = await FilePickerWeb.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['pdf'],
         withData: true,
@@ -99,10 +90,7 @@ class _CalendarPageState extends State<CalendarPage> {
       'detail': _controllers[3].text,
       'pdf': _pdfName,
     }).then((value) async {
-      await FirebaseStorage.instance
-          .ref()
-          .child('training/${value.id}/$_pdfName')
-          .putData(_pdf!);
+      await FirebaseStorage.instance.ref().child('training/${value.id}/$_pdfName').putData(_pdf!);
       _pdf = null;
       _pdfName = null;
     });
@@ -115,10 +103,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Uint8List? _pdfBytes;
   String? _docId;
   Future<Uint8List> getPdf(String docId, String fileName) async {
-    final data = await FirebaseStorage.instance
-        .ref()
-        .child('training/$docId/$fileName')
-        .getData();
+    final data = await FirebaseStorage.instance.ref().child('training/$docId/$fileName').getData();
     _docId = docId;
     return data as Uint8List;
   }
@@ -170,16 +155,11 @@ class _CalendarPageState extends State<CalendarPage> {
         }
         // sort events based on timeStart
         if (_selectedDay != null) {
-          selectedEvents = events
-              .where((event) =>
-                  event['date'] == _selectedDay!.millisecondsSinceEpoch)
-              .toList();
+          selectedEvents = events.where((event) => event['date'] == _selectedDay!.millisecondsSinceEpoch).toList();
           selectedEvents.sort((a, b) {
             var aTime = a['start'].split(':');
             var bTime = b['start'].split(':');
-            return int.parse(aTime[0]) * 60 +
-                int.parse(aTime[1]) -
-                (int.parse(bTime[0]) * 60 + int.parse(bTime[1]));
+            return int.parse(aTime[0]) * 60 + int.parse(aTime[1]) - (int.parse(bTime[0]) * 60 + int.parse(bTime[1]));
           });
         }
         return Scaffold(
@@ -225,34 +205,24 @@ class _CalendarPageState extends State<CalendarPage> {
                     ),
                     formatButtonShowsNext: false,
                     formatButtonDecoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).colorScheme.primary),
-                      borderRadius:
-                          const BorderRadius.all(Radius.circular(20.0)),
+                      border: Border.all(color: Theme.of(context).colorScheme.primary),
+                      borderRadius: const BorderRadius.all(Radius.circular(20.0)),
                     ),
                   ),
                   daysOfWeekHeight: 30,
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .secondary
-                          .withOpacity(.5),
+                      color: Theme.of(context).colorScheme.secondary.withOpacity(.5),
                       shape: BoxShape.circle,
                     ),
-                    todayTextStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onSecondary),
+                    todayTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                     selectedDecoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.secondary,
                       shape: BoxShape.circle,
                     ),
-                    selectedTextStyle: TextStyle(
-                        color: Theme.of(context).colorScheme.onSecondary),
+                    selectedTextStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
                   ),
-                  eventLoader: (day) => events
-                      .where((event) =>
-                          event['date'] == day.millisecondsSinceEpoch)
-                      .toList(),
+                  eventLoader: (day) => events.where((event) => event['date'] == day.millisecondsSinceEpoch).toList(),
                 ),
                 Expanded(
                   child: ListView.builder(
@@ -267,18 +237,14 @@ class _CalendarPageState extends State<CalendarPage> {
                             context: context,
                             builder: (context) => StatefulBuilder(
                                 builder: (context, setState) => AlertDialog(
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0)),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
                                       title: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text('${event['title']}'),
                                           Text(
                                             '${event['start']}~${event['end']}',
-                                            style:
-                                                const TextStyle(fontSize: 16.0),
+                                            style: const TextStyle(fontSize: 16.0),
                                           ),
                                         ],
                                       ),
@@ -288,95 +254,57 @@ class _CalendarPageState extends State<CalendarPage> {
                                           SizedBox(
                                             width: double.infinity,
                                             child: Scrollbar(
-                                              child: SingleChildScrollView(
-                                                  child: Text(
-                                                      '${event['detail']}')),
+                                              child: SingleChildScrollView(child: Text('${event['detail']}')),
                                             ),
                                           ),
                                           const SizedBox(height: 10),
                                           Builder(
                                             builder: (context) {
                                               if (!kIsWeb) {
-                                                if (_pdfBytes == null ||
-                                                    _docId != event['id']) {
-                                                  getPdf(event['id'],
-                                                          event['pdf'])
-                                                      .then((value) =>
-                                                          setState(() {
-                                                            _pdfBytes = value;
-                                                          }));
+                                                if (_pdfBytes == null || _docId != event['id']) {
+                                                  getPdf(event['id'], event['pdf']).then((value) => setState(() {
+                                                        _pdfBytes = value;
+                                                      }));
                                                   return const Center(
-                                                    child:
-                                                        CircularProgressIndicator(),
+                                                    child: CircularProgressIndicator(),
                                                   );
                                                 } else {
-                                                  _pdfController =
-                                                      PdfControllerPinch(
-                                                          document: PdfDocument
-                                                              .openData(
-                                                                  _pdfBytes!));
+                                                  _pdfController = PdfControllerPinch(document: PdfDocument.openData(_pdfBytes!));
                                                   return MaterialButton(
-                                                    child: Text(
-                                                        '${event['pdf']} を見る'),
+                                                    child: Text('${event['pdf']} を見る'),
                                                     onPressed: () {
-                                                      _pdfController =
-                                                          PdfControllerPinch(
-                                                              document: PdfDocument
-                                                                  .openData(
-                                                                      _pdfBytes!));
+                                                      _pdfController = PdfControllerPinch(document: PdfDocument.openData(_pdfBytes!));
                                                       Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              Scaffold(
+                                                          builder: (context) => Scaffold(
                                                             body: Container(
-                                                              color:
-                                                                  Colors.white,
+                                                              color: Colors.white,
                                                               child: Stack(
                                                                 children: [
-                                                                  PdfViewPinch(
-                                                                      controller:
-                                                                          _pdfController),
+                                                                  PdfViewPinch(controller: _pdfController),
                                                                   Positioned(
                                                                     left: 20,
                                                                     bottom: 30,
-                                                                    child:
-                                                                        ElevatedButton(
-                                                                      style: ElevatedButton
-                                                                          .styleFrom(
-                                                                        minimumSize: const Size(
-                                                                            50,
-                                                                            50),
-                                                                        shape:
-                                                                            const CircleBorder(),
+                                                                    child: ElevatedButton(
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        minimumSize: const Size(50, 50),
+                                                                        shape: const CircleBorder(),
                                                                       ),
-                                                                      onPressed:
-                                                                          () =>
-                                                                              Navigator.pop(context),
-                                                                      child: const Icon(
-                                                                          Icons
-                                                                              .arrow_back),
+                                                                      onPressed: () => Navigator.pop(context),
+                                                                      child: const Icon(Icons.arrow_back),
                                                                     ),
                                                                   ),
                                                                   Positioned(
                                                                     right: 20,
                                                                     bottom: 30,
-                                                                    child:
-                                                                        ElevatedButton(
-                                                                      style: ElevatedButton
-                                                                          .styleFrom(
-                                                                        minimumSize: const Size(
-                                                                            50,
-                                                                            50),
-                                                                        shape:
-                                                                            const CircleBorder(),
+                                                                    child: ElevatedButton(
+                                                                      style: ElevatedButton.styleFrom(
+                                                                        minimumSize: const Size(50, 50),
+                                                                        shape: const CircleBorder(),
                                                                       ),
-                                                                      onPressed:
-                                                                          () =>
-                                                                              downloadPDF(event['pdf']),
-                                                                      child: const Icon(
-                                                                          Icons
-                                                                              .download),
+                                                                      onPressed: () => downloadPDF(event['pdf']),
+                                                                      child: const Icon(Icons.download),
                                                                     ),
                                                                   ),
                                                                 ],
@@ -391,49 +319,26 @@ class _CalendarPageState extends State<CalendarPage> {
                                               } else {
                                                 return Center(
                                                   child: Column(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
+                                                      RichText(text: const TextSpan(text: '現在使用しているプラットフォームはPDFビュアーが使用できません')),
                                                       RichText(
-                                                          text: const TextSpan(
-                                                              text:
-                                                                  '現在使用しているプラットフォームはPDFビュアーが使用できません')),
-                                                      RichText(
-                                                          text: TextSpan(
-                                                              children: [
-                                                            const TextSpan(
-                                                                text:
-                                                                    'こちらクリックしてダウンロードしてください：  '),
-                                                            TextSpan(
-                                                              text:
-                                                                  event['pdf'],
-                                                              recognizer:
-                                                                  TapGestureRecognizer()
-                                                                    ..onTap =
-                                                                        () async {
-                                                                      String url = await FirebaseStorage
-                                                                          .instance
-                                                                          .ref()
-                                                                          .child(
-                                                                              'training/${event['id']}/${event['pdf']}')
-                                                                          .getDownloadURL();
-                                                                      launchUrl(
-                                                                          Uri.parse(
-                                                                              url));
-                                                                    },
-                                                              style:
-                                                                  const TextStyle(
-                                                                color:
-                                                                    Colors.blue,
-                                                                decoration:
-                                                                    TextDecoration
-                                                                        .underline,
-                                                              ),
-                                                            ),
-                                                          ])),
+                                                          text: TextSpan(children: [
+                                                        const TextSpan(text: 'こちらクリックしてダウンロードしてください：  '),
+                                                        TextSpan(
+                                                          text: event['pdf'],
+                                                          recognizer: TapGestureRecognizer()
+                                                            ..onTap = () async {
+                                                              String url = await FirebaseStorage.instance.ref().child('training/${event['id']}/${event['pdf']}').getDownloadURL();
+                                                              launchUrl(Uri.parse(url));
+                                                            },
+                                                          style: const TextStyle(
+                                                            color: Colors.blue,
+                                                            decoration: TextDecoration.underline,
+                                                          ),
+                                                        ),
+                                                      ])),
                                                     ],
                                                   ),
                                                 );
@@ -444,8 +349,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(context),
+                                          onPressed: () => Navigator.pop(context),
                                           child: const Text('閉じる'),
                                         ),
                                       ],
@@ -460,8 +364,7 @@ class _CalendarPageState extends State<CalendarPage> {
             ),
           ),
           floatingActionButton: FloatingActionButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(50.0)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50.0)),
             backgroundColor: Theme.of(context).colorScheme.secondary,
             onPressed: () {
               if (_selectedDay != null) {
@@ -470,8 +373,7 @@ class _CalendarPageState extends State<CalendarPage> {
                   builder: (context) {
                     return StatefulBuilder(
                       builder: (context, setState) => AlertDialog(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.background,
+                        backgroundColor: Theme.of(context).colorScheme.background,
                         content: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -479,8 +381,7 @@ class _CalendarPageState extends State<CalendarPage> {
                               '新規研修予定の追加',
                               style: TextStyle(
                                 fontSize: 18.0,
-                                color:
-                                    Theme.of(context).colorScheme.onBackground,
+                                color: Theme.of(context).colorScheme.onBackground,
                               ),
                             ),
                             Padding(
@@ -491,8 +392,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                   autofocus: true,
                                   textInputAction: TextInputAction.next,
                                   controller: _controllers[0],
-                                  decoration: const InputDecoration(
-                                      labelText: '研修名', isDense: true),
+                                  decoration: const InputDecoration(labelText: '研修名', isDense: true),
                                 ),
                               ),
                             ),
@@ -504,8 +404,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                   textInputAction: TextInputAction.next,
                                   controller: _controllers[1],
                                   // focusNode: _focus,
-                                  decoration: const InputDecoration(
-                                      labelText: '開始時間', isDense: true),
+                                  decoration: const InputDecoration(labelText: '開始時間', isDense: true),
                                   onTap: () => _selectTime(context, 1),
                                 ),
                               ),
@@ -518,8 +417,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                   textInputAction: TextInputAction.next,
                                   controller: _controllers[2],
                                   focusNode: _focus,
-                                  decoration: const InputDecoration(
-                                      labelText: '終了時間', isDense: true),
+                                  decoration: const InputDecoration(labelText: '終了時間', isDense: true),
                                   onTap: () => _selectTime(context, 2),
                                 ),
                               ),
@@ -531,8 +429,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                 child: TextField(
                                   textInputAction: TextInputAction.done,
                                   controller: _controllers[3],
-                                  decoration: const InputDecoration(
-                                      labelText: '内容', isDense: true),
+                                  decoration: const InputDecoration(labelText: '内容', isDense: true),
                                 ),
                               ),
                             ),
@@ -558,8 +455,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       title: const Center(child: Text('エラー')),
                                       content: const Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Center(child: Text('以下の項目を確認してください')),
                                           Text('・項目がすべて埋まっているか'),
@@ -569,8 +465,7 @@ class _CalendarPageState extends State<CalendarPage> {
                                       ),
                                       actions: [
                                         TextButton(
-                                          onPressed: () =>
-                                              Navigator.of(context).pop(),
+                                          onPressed: () => Navigator.of(context).pop(),
                                           child: const Text('閉じる'),
                                         ),
                                       ],
