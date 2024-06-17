@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +15,7 @@ class ChatTile extends StatefulWidget {
   final DateTime latest_time;
   final String chatId;
   final int chatIndex;
-  Function(BuildContext)? deleteChat;
+  // Function(BuildContext)? deleteChat;
 
   ChatTile({
     super.key,
@@ -23,11 +25,51 @@ class ChatTile extends StatefulWidget {
     required this.latest_time,
     required this.chatId,
     required this.chatIndex,
-    this.deleteChat,
+    // required this.deleteChat,
   });
 
   @override
   State<ChatTile> createState() => _ChatTileState();
+}
+
+final user = FirebaseAuth.instance.currentUser!;
+final db = FirebaseFirestore.instance;
+String userId = FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+
+// delete chat when deletion button is pressed
+void deleteChat(BuildContext context, String chatId, int chatIndex, String type) {
+  if (type == 'dm') {
+    String otherUser = '';
+    db.collection('userData').doc(userId).get().then((doc) {
+      otherUser = doc['dm'][chatIndex];
+      db.collection('userData').doc(otherUser).update({
+        'dm': FieldValue.arrayRemove([userId]),
+        'dmId': FieldValue.arrayRemove([chatId]),
+      });
+    });
+    db.collection('dm').doc(chatId).delete();
+    db.collection('userData').doc(userId).update({
+      'dm': FieldValue.arrayRemove([otherUser]),
+      'dmId': FieldValue.arrayRemove([chatId]),
+    });
+  } else {
+    List<String> users = [];
+    db.collection('group').doc(chatId).get().then((doc) {
+      users = List<String>.from(doc['users']);
+      for (var user in users) {
+        db.collection('userData').doc(user).update({
+          'group': FieldValue.arrayRemove([chatId]),
+        });
+      }
+    });
+    db.collection('group').doc(chatId).delete();
+    for (var user in users) {
+      db.collection('userData').doc(user).update({
+        'group': FieldValue.arrayRemove([chatId]),
+      });
+    }
+  }
+  Navigator.of(context).pop();
 }
 
 class _ChatTileState extends State<ChatTile> {
@@ -43,13 +85,9 @@ class _ChatTileState extends State<ChatTile> {
     final yesterday = DateTime(now.year, now.month, now.day - 1);
 
     // Truncate the latest message if it's longer than 13 characters
-    final formatted_message = widget.latest_message.length > 30
-        ? '${widget.latest_message.substring(0, 30)}…'
-        : widget.latest_message;
+    final formatted_message = widget.latest_message.length > 30 ? '${widget.latest_message.substring(0, 30)}…' : widget.latest_message;
 
-    final formatted_chat_name = widget.name.length > 20
-        ? '${widget.name.substring(0, 20)}…'
-        : widget.name;
+    final formatted_chat_name = widget.name.length > 20 ? '${widget.name.substring(0, 20)}…' : widget.name;
 
     // Format the time based on the message's timestamp
     if (widget.latest_time.isAfter(today)) {
@@ -59,8 +97,7 @@ class _ChatTileState extends State<ChatTile> {
     } else if (widget.latest_time.year == now.year) {
       formattedTime = DateFormat('MMM d, HH:mm').format(widget.latest_time);
     } else {
-      formattedTime =
-          DateFormat('MMM d, yyyy, HH:mm').format(widget.latest_time);
+      formattedTime = DateFormat('MMM d, yyyy, HH:mm').format(widget.latest_time);
     }
 
     return Padding(
@@ -68,7 +105,30 @@ class _ChatTileState extends State<ChatTile> {
       child: Slidable(
         endActionPane: ActionPane(motion: const StretchMotion(), children: [
           SlidableAction(
-            onPressed: widget.deleteChat,
+            onPressed: (BuildContext context) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('チャットルームを削除しますか？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          deleteChat(context, widget.chatId, widget.chatIndex, widget.type);
+                        },
+                        child: const Text('削除'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: Icons.delete,
             backgroundColor: Colors.red.shade300,
             borderRadius: BorderRadius.circular(12),
