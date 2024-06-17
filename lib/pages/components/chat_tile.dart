@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -13,7 +15,7 @@ class ChatTile extends StatefulWidget {
   final DateTime latest_time;
   final String chatId;
   final int chatIndex;
-  Function(BuildContext)? deleteChat;
+  // Function(BuildContext)? deleteChat;
 
   ChatTile({
     super.key,
@@ -23,11 +25,74 @@ class ChatTile extends StatefulWidget {
     required this.latest_time,
     required this.chatId,
     required this.chatIndex,
-    this.deleteChat,
+    // required this.deleteChat,
   });
 
   @override
   State<ChatTile> createState() => _ChatTileState();
+}
+
+final user = FirebaseAuth.instance.currentUser!;
+final db = FirebaseFirestore.instance;
+String userId = FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+
+// delete chat when deletion button is pressed
+Future<void> deleteChat(BuildContext context, String chatId, int chatIndex, String type) async {
+  if (type == 'dm') {
+    String otherUser = '';
+    await db.collection('userData').doc(userId).get().then((doc) {
+      otherUser = doc['dm'][chatIndex];
+      otherUser = otherUser.toLowerCase();
+      // get the chat index for the other user
+      int otherIndex = doc['dmId'].indexOf(chatId);
+      db.collection('userData').doc(otherUser).update({
+        'dm': FieldValue.arrayRemove([userId]),
+        'dmId': FieldValue.arrayRemove([chatId]),
+      });
+      // delete dmLastSeen according to otherIndex
+      db.collection('userData').doc(otherUser).get().then((doc) {
+        List<dynamic> dmLastSeen = List<dynamic>.from(doc['dmLastSeen']);
+        dmLastSeen.removeAt(otherIndex);
+        db.collection('userData').doc(chatId).update({
+          'dmLastSeen': dmLastSeen,
+        });
+      });
+    });
+    db.collection('userData').doc(userId).update({
+      'dm': FieldValue.arrayRemove([otherUser]),
+      'dmId': FieldValue.arrayRemove([chatId]),
+    });
+    // delete dmLastSeen according to chatIndex
+    db.collection('userData').doc(userId).get().then((doc) {
+      List<dynamic> dmLastSeen = List<dynamic>.from(doc['dmLastSeen']);
+      dmLastSeen.removeAt(chatIndex);
+      db.collection('userData').doc(userId).update({
+        'dmLastSeen': dmLastSeen,
+      });
+    });
+    db.collection('dm').doc(chatId).delete();
+  } else {
+    List<String> users = [];
+    await db.collection('group').doc(chatId).get().then((doc) {
+      users = List<String>.from(doc['users']);
+    });
+    for (var user in users) {
+      // get the chat index for all users
+      await db.collection('userData').doc(user).get().then((doc) {
+        int groupIndex = doc['group'].indexOf(chatId);
+        List<dynamic> groupLastSeen = List<dynamic>.from(doc['groupLastSeen']);
+        List<dynamic> groups = List<dynamic>.from(doc['group']);
+        groupLastSeen.removeAt(groupIndex);
+        groups.remove(chatId);
+        db.collection('userData').doc(user).update({
+          'group': groups,
+          'groupLastSeen': groupLastSeen,
+        });
+      });
+    }
+    db.collection('group').doc(chatId).delete();
+  }
+  Navigator.of(context).pop();
 }
 
 class _ChatTileState extends State<ChatTile> {
@@ -43,13 +108,9 @@ class _ChatTileState extends State<ChatTile> {
     final yesterday = DateTime(now.year, now.month, now.day - 1);
 
     // Truncate the latest message if it's longer than 13 characters
-    final formatted_message = widget.latest_message.length > 30
-        ? '${widget.latest_message.substring(0, 30)}…'
-        : widget.latest_message;
+    final formatted_message = widget.latest_message.length > 30 ? '${widget.latest_message.substring(0, 30)}…' : widget.latest_message;
 
-    final formatted_chat_name = widget.name.length > 20
-        ? '${widget.name.substring(0, 20)}…'
-        : widget.name;
+    final formatted_chat_name = widget.name.length > 20 ? '${widget.name.substring(0, 20)}…' : widget.name;
 
     // Format the time based on the message's timestamp
     if (widget.latest_time.isAfter(today)) {
@@ -59,8 +120,7 @@ class _ChatTileState extends State<ChatTile> {
     } else if (widget.latest_time.year == now.year) {
       formattedTime = DateFormat('MMM d, HH:mm').format(widget.latest_time);
     } else {
-      formattedTime =
-          DateFormat('MMM d, yyyy, HH:mm').format(widget.latest_time);
+      formattedTime = DateFormat('MMM d, yyyy, HH:mm').format(widget.latest_time);
     }
 
     return Padding(
@@ -68,7 +128,30 @@ class _ChatTileState extends State<ChatTile> {
       child: Slidable(
         endActionPane: ActionPane(motion: const StretchMotion(), children: [
           SlidableAction(
-            onPressed: widget.deleteChat,
+            onPressed: (BuildContext context) {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: const Text('チャットルームを削除しますか？'),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text('キャンセル'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          deleteChat(context, widget.chatId, widget.chatIndex, widget.type);
+                        },
+                        child: const Text('削除'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
             icon: Icons.delete,
             backgroundColor: Colors.red.shade300,
             borderRadius: BorderRadius.circular(12),

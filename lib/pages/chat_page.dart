@@ -31,8 +31,7 @@ class _ChatPageState extends State<ChatPage> {
 
   final user = FirebaseAuth.instance.currentUser!;
   final db = FirebaseFirestore.instance;
-  String userId =
-      FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
+  String userId = FirebaseAuth.instance.currentUser!.email!.replaceAll('@shine.com', '');
 
   @override
   void initState() {
@@ -67,8 +66,7 @@ class _ChatPageState extends State<ChatPage> {
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: db.collection('userData').snapshots(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.hasError) {
                   return const Text('エラーが発生しました');
                 }
@@ -78,12 +76,9 @@ class _ChatPageState extends State<ChatPage> {
                   );
                 }
 
-                final dmIds = List<String>.from(snapshot.data!.docs
-                    .firstWhere((doc) => doc.id == userId)['dmId']);
-                final dmNames = List<String>.from(snapshot.data!.docs
-                    .firstWhere((doc) => doc.id == userId)['dm']);
-                final groupIds = List<String>.from(snapshot.data!.docs
-                    .firstWhere((doc) => doc.id == userId)['group']);
+                final dmIds = List<String>.from(snapshot.data!.docs.firstWhere((doc) => doc.id == userId)['dmId']);
+                final dmNames = List<String>.from(snapshot.data!.docs.firstWhere((doc) => doc.id == userId)['dm']);
+                final groupIds = List<String>.from(snapshot.data!.docs.firstWhere((doc) => doc.id == userId)['group']);
 
                 if (dmIds.isEmpty && groupIds.isEmpty) {
                   return const Center(
@@ -93,8 +88,7 @@ class _ChatPageState extends State<ChatPage> {
                   // Get the latest message and time from DMs
                   return StreamBuilder<QuerySnapshot>(
                     stream: db.collection('userData').snapshots(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                    builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                       if (snapshot.hasError) {
                         return const Text('エラーが発生しました');
                       }
@@ -107,13 +101,11 @@ class _ChatPageState extends State<ChatPage> {
 
                       return StreamBuilder<QuerySnapshot>(
                         stream: db.collection('dm').snapshots(),
-                        builder: (BuildContext context,
-                            AsyncSnapshot<QuerySnapshot> snapshot) {
+                        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                           if (snapshot.hasError) {
                             return const Text('エラーが発生しました');
                           }
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -122,14 +114,8 @@ class _ChatPageState extends State<ChatPage> {
                           for (var index = 0; index < dmNames.length; index++) {
                             final chatRoom = {
                               'chatId': dmIds[index],
-                              'message': snapshot.data!.docs
-                                  .firstWhere((doc) => doc.id == dmIds[index])[
-                                      'messages']
-                                  .last,
-                              'time': snapshot.data!.docs
-                                  .firstWhere(
-                                      (doc) => doc.id == dmIds[index])['time']
-                                  .last,
+                              'message': snapshot.data!.docs.firstWhere((doc) => doc.id == dmIds[index])['messages'].last,
+                              'time': snapshot.data!.docs.firstWhere((doc) => doc.id == dmIds[index])['time'].last,
                               'name': capitalize(dmNames[index]),
                               'type': 'dm',
                               'index': index,
@@ -140,41 +126,27 @@ class _ChatPageState extends State<ChatPage> {
                           // Get the latest message and time from groups
                           return StreamBuilder<QuerySnapshot>(
                             stream: db.collection('group').snapshots(),
-                            builder: (BuildContext context,
-                                AsyncSnapshot<QuerySnapshot> snapshot) {
+                            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                               if (snapshot.hasError) {
                                 return const Text('エラーが発生しました');
                               }
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
                                 return const Center(
                                   child: CircularProgressIndicator(),
                                 );
                               }
-                              for (var index = 0;
-                                  index < groupIds.length;
-                                  index++) {
+                              for (var index = 0; index < groupIds.length; index++) {
                                 final chatRoom = {
                                   'chatId': groupIds[index],
-                                  'message': snapshot.data!.docs
-                                      .firstWhere((doc) =>
-                                          doc.id == groupIds[index])['messages']
-                                      .last,
-                                  'time': snapshot.data!.docs
-                                      .firstWhere((doc) =>
-                                          doc.id == groupIds[index])['time']
-                                      .last,
-                                  'name': snapshot.data!.docs.firstWhere(
-                                      (doc) =>
-                                          doc.id == groupIds[index])['name'],
+                                  'message': snapshot.data!.docs.firstWhere((doc) => doc.id == groupIds[index])['messages'].last,
+                                  'time': snapshot.data!.docs.firstWhere((doc) => doc.id == groupIds[index])['time'].last,
+                                  'name': snapshot.data!.docs.firstWhere((doc) => doc.id == groupIds[index])['name'],
                                   'type': 'group',
                                   'index': index,
                                 };
 
                                 // Check if the chat room already exists
-                                final existingChatRoomIndex =
-                                    chatRooms.indexWhere((room) =>
-                                        room['groupId'] == groupIds[index]);
+                                final existingChatRoomIndex = chatRooms.indexWhere((room) => room['groupId'] == groupIds[index]);
                                 if (existingChatRoomIndex != -1) {
                                   // Update the existing chat room
                                   chatRooms[existingChatRoomIndex] = chatRoom;
@@ -183,11 +155,9 @@ class _ChatPageState extends State<ChatPage> {
                                   chatRooms.add(chatRoom);
                                 }
                               }
-                              chatRooms.sort(
-                                  (a, b) => b['time'].compareTo(a['time']));
+                              chatRooms.sort((a, b) => b['time'].compareTo(a['time']));
                               return ListView.builder(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 5),
+                                padding: const EdgeInsets.symmetric(vertical: 5),
                                 itemCount: dmNames.length + groupIds.length,
                                 itemBuilder: (BuildContext context, int index) {
                                   final chatRoom = chatRooms[index];
@@ -195,10 +165,7 @@ class _ChatPageState extends State<ChatPage> {
                                     name: chatRoom['name'],
                                     type: chatRoom['type'],
                                     latest_message: chatRoom['message'],
-                                    latest_time:
-                                        DateTime.fromMicrosecondsSinceEpoch(
-                                            chatRoom['time']
-                                                .microsecondsSinceEpoch),
+                                    latest_time: DateTime.fromMicrosecondsSinceEpoch(chatRoom['time'].microsecondsSinceEpoch),
                                     chatId: chatRoom['chatId'],
                                     chatIndex: chatRoom['index'],
                                   );
