@@ -15,7 +15,6 @@ class ChatTile extends StatefulWidget {
   final DateTime latest_time;
   final String chatId;
   final int chatIndex;
-  // Function(BuildContext)? deleteChat;
 
   ChatTile({
     super.key,
@@ -25,7 +24,6 @@ class ChatTile extends StatefulWidget {
     required this.latest_time,
     required this.chatId,
     required this.chatIndex,
-    // required this.deleteChat,
   });
 
   @override
