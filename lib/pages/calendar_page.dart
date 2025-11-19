@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+// import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 // import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -307,6 +309,14 @@ class _CalendarPageState extends State<CalendarPage> {
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
                                         child: const Text('閉じる'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('編集')
+                                      ),
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text('削除')
                                       ),
                                     ],
                                   );
